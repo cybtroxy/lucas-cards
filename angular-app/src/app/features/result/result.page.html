@@ -4,23 +4,47 @@
     <div class="result-wrap">
       <div id="result-emoji" class="result-emoji">{{ r.emoji }}</div>
       <h2 id="result-title">{{ r.title }}</h2>
-      <p id="result-subtitle">{{ r.subtitle }}</p>
-      <p class="result-series-note" id="result-series-note">{{ r.seriesNote }}</p>
 
-      <div class="result-stats" id="result-stats">
-        @for (row of r.statsRows; track row.label) {
-          <div class="result-stat">
-            <div class="label">{{ row.label }}</div>
-            <div class="value">{{ row.value }}</div>
-          </div>
-        }
+      <div class="result-detail-toggle-wrap">
+        <button
+          type="button"
+          class="result-detail-toggle"
+          id="btn-result-combat-detail"
+          [class.result-detail-toggle--open]="combatDetailOpen()"
+          [attr.aria-expanded]="combatDetailOpen()"
+          aria-controls="result-combat-detail-panel"
+          (click)="toggleCombatDetail()"
+        >
+          <span class="result-detail-chevron" aria-hidden="true">▼</span>
+          <span class="result-detail-toggle-label">{{ i18n.tUi('resultCombatDetailToggle') }}</span>
+        </button>
       </div>
 
-      <p class="result-combat-log-wrap">
-        <button type="button" class="btn-secondary" id="btn-result-combat-log" (click)="openLog()">
-          {{ i18n.isEn() ? 'View battle log' : 'Ver registro del combate' }}
-        </button>
-      </p>
+      <div
+        id="result-combat-detail-panel"
+        class="result-combat-detail-panel"
+        role="region"
+        [attr.aria-label]="i18n.tUi('resultCombatDetailToggle')"
+        [hidden]="!combatDetailOpen()"
+      >
+        <p id="result-subtitle">{{ r.subtitle }}</p>
+        <p class="result-series-note" id="result-series-note">{{ r.seriesNote }}</p>
+
+        <div class="result-stats" id="result-stats">
+          @for (row of r.statsRows; track row.label) {
+            <div class="result-stat">
+              <div class="label">{{ row.label }}</div>
+              <div class="value">{{ row.value }}</div>
+            </div>
+          }
+        </div>
+
+        <p class="result-combat-log-wrap">
+          <button type="button" class="btn-secondary" id="btn-result-combat-log" (click)="openLog()">
+            {{ i18n.isEn() ? 'View battle log' : 'Ver registro del combate' }}
+          </button>
+        </p>
+      </div>
 
       <div class="menu-actions result-actions">
         @if (!r.seriesOver) {

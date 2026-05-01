@@ -652,10 +652,19 @@ app-result-page {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px 24px 24px;
+  gap: 14px;
+}
+.select-footer-actions {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px 24px;
   gap: 12px;
+}
+.select-footer .select-glossary-btn {
+  align-self: center;
 }
 
 /* ===== Carta ===== */
@@ -1134,7 +1143,7 @@ app-card {
   color: var(--gold);
 }
 
-/* Arena: padding vertical para transform/glow; gap con el VS separa bordes y halos */
+/* Arena: gap con el VS separa bordes y halos; padding solo horizontal */
 .arena {
   position: relative;
   z-index: 1;
@@ -1144,7 +1153,7 @@ app-card {
   grid-template-columns: 1fr auto 1fr;
   align-items: stretch;
   gap: 6px;
-  padding: 32px 12px 36px;
+  padding: 0 12px;
   overflow: visible;
 }
 #screen-battle .side {
@@ -1156,11 +1165,11 @@ app-card {
   min-height: 300px;
   min-width: 0;
   flex-wrap: nowrap;
-  /* Sin scroll: el mazo se recorta; relleno interior + .side-scale padding evitan el corte en shake/rotate */
-  overflow: hidden;
+  overflow: visible;
   scrollbar-width: none;
   box-sizing: border-box;
   isolation: isolate;
+  z-index: 0;
   padding-top: 36px;
   padding-bottom: 44px;
 }
@@ -1207,6 +1216,7 @@ app-card {
 }
 .arena .vs-badge {
   align-self: center;
+  z-index: 2;
 }
 .vs-badge {
   font-family: 'Cinzel', serif;
@@ -1549,6 +1559,9 @@ app-card {
   text-shadow: 0 2px 0 #5a3a06;
 }
 .result-wrap p { color: var(--ink-dim); margin: 0 0 20px; }
+.result-combat-detail-panel[hidden] {
+  display: none !important;
+}
 .result-stats {
   display: flex;
   justify-content: center;
@@ -1665,30 +1678,102 @@ app-card {
 }
 
 /* ===== Responsive ===== */
+/* Tablet y móvil: sin registro de combate; cabecera siempre en una fila */
+@media (max-width: 1024px) {
+  #screen-battle .combat-event-panel,
+  #screen-battle .combat-log-backdrop {
+    display: none !important;
+  }
+  #screen-battle .battle-log {
+    display: none !important;
+  }
+  .battle-topbar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+  .player-badge.left {
+    justify-self: start;
+    margin: 0;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .player-badge.right {
+    justify-self: end;
+    margin: 0;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .round-pill {
+    justify-self: center;
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 760px) {
   .game-title { font-size: 36px; }
-  #screen-battle .arena { padding: 24px 8px 32px; gap: 4px; }
-  #screen-battle .player-side { padding: 26px 28px 34px 20px; }
-  #screen-battle .rival-side { padding: 26px 20px 34px 28px; }
+  #screen-select .hint,
+  #screen-select .section-hint {
+    display: none;
+  }
+  #screen-battle .arena { padding: 0; gap: 4px; }
+  /* Solo móvil: sin padding horizontal en jugador; rival sin cambio explícito aquí */
+  #screen-battle .player-side {
+    padding-top: 26px;
+    padding-right: 0;
+    padding-bottom: 34px;
+    padding-left: 0;
+  }
+  #screen-battle .rival-side {
+    padding-top: 26px;
+    padding-right: 0;
+    padding-bottom: 34px;
+    padding-left: 0;
+  }
   #screen-battle .side app-card {
     min-width: min(160px, 42vw);
     max-width: min(200px, 90vw);
     width: min(180px, 48vw);
   }
-  .vs-badge { font-size: 26px; }
-  .battle-topbar { grid-template-columns: 1fr; gap: 8px; padding: 8px 12px; }
-  .player-badge, .player-badge.right { margin: 0 auto; }
-  .round-pill { margin: 0 auto; padding: 6px 16px; }
+  .vs-badge {
+    font-size: 26px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .round-pill { padding: 6px 10px; }
+  .round-pill .series-line,
+  .round-pill .ronda-progress {
+    display: none;
+  }
+  .round-pill .ronda-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .player-badge {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  .player-badge .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+  .player-badge .info .name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 28vw;
+  }
+  .player-badge .info .trophy {
+    font-size: 11px;
+  }
   .battle-controls { grid-template-columns: 1fr; gap: 8px; }
   .battle-controls-center { width: 100%; flex-direction: column; }
   .speed-controls { justify-content: center; }
   .combat-zoom-controls { flex-wrap: wrap; justify-content: center; }
-  .end-turn { justify-self: center; width: 100%; max-width: 280px; }
-  .battle-log { font-size: 13px; padding: 10px 16px; margin: 8px 12px; }
-  .combat-event-panel.is-float {
-    left: 8px;
-    right: 8px;
-    max-width: none;
-    max-height: min(30vh, 220px);
-  }
+  .end-turn { display: none; }
 }

@@ -16,6 +16,7 @@ export class ResultPageComponent {
 
   readonly result = this.gs.lastResult;
   readonly combatLogOpen = signal(false);
+  readonly combatDetailOpen = signal(false);
 
   readonly logSnapshotSafe = computed(() =>
     this.sanitizer.bypassSecurityTrustHtml(this.gs.game().lastCombatEventLogSnapshot || ''),
@@ -41,5 +42,9 @@ export class ResultPageComponent {
 
   closeLog(): void {
     this.combatLogOpen.set(false);
+  }
+
+  toggleCombatDetail(): void {
+    this.combatDetailOpen.update((v) => !v);
   }
 }

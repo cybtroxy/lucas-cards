@@ -63,7 +63,7 @@ export function stackStatsFromCopies(
 export const MAX_COPIES_PER_DECK_SLOT_STACK = 3;
 
 export const MAX_DUEL_ASALTOS = 600;
-export const SHOP_OFFER_COUNT = 7;
+export const SHOP_OFFER_COUNT = 6;
 /** Máximo de la misma carta (id) en la rejilla de la tienda a la vez. */
 export const SHOP_MAX_SAME_CARD = 3;
 export const SHOP_REFRESH_COST = 1;

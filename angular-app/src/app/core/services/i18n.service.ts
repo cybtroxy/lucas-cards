@@ -93,6 +93,7 @@ const UI: Record<LucasLang, Record<string, string>> = {
     refColDesc: 'Descripción',
     selectDeckFullToast:
       'Quita una carta del mazo para poder añadir otras nuevas.',
+    resultCombatDetailToggle: 'Detalle de combate',
   },
   en: {
     typeBadgeTitle: 'Type',
@@ -106,6 +107,7 @@ const UI: Record<LucasLang, Record<string, string>> = {
     refColName: 'Name',
     refColDesc: 'Description',
     selectDeckFullToast: 'Remove a card from your deck to add new ones.',
+    resultCombatDetailToggle: 'Battle details',
   },
 };
 

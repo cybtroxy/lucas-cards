@@ -14,11 +14,6 @@
         <span id="budget-left">{{ budgetLeft() }}</span>
       </div>
     </div>
-    <div class="select-header-actions">
-      <button type="button" class="btn-secondary select-glossary-btn" (click)="openGlossary()">
-        {{ i18n.tUi('selectGlossaryBtn') }}
-      </button>
-    </div>
   </header>
 
   <div class="select-body">
@@ -95,9 +90,14 @@
   }
 
   <footer class="select-footer">
-    <button type="button" class="btn-secondary" (click)="backMenu()">← Volver</button>
-    <button type="button" class="btn-primary" id="btn-start-battle" [disabled]="!canStart()" (click)="startBattle()">
-      ¡A la batalla!
+    <div class="select-footer-actions">
+      <button type="button" class="btn-secondary" (click)="backMenu()">← Volver</button>
+      <button type="button" class="btn-primary" id="btn-start-battle" [disabled]="!canStart()" (click)="startBattle()">
+        ¡A la batalla!
+      </button>
+    </div>
+    <button type="button" class="btn-secondary select-glossary-btn" (click)="openGlossary()">
+      {{ i18n.tUi('selectGlossaryBtn') }}
     </button>
   </footer>
 
