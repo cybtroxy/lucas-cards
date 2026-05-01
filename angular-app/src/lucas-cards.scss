@@ -377,12 +377,12 @@ app-result-page {
 .hidden { display: none !important; }
 
 /* Selección: scroll vertical cuando el contenido supera el viewport.
-   padding-top deja hueco bajo la barra de serie fija (altura ~52px). */
+   Hueco bajo la barra de serie fija: ~48px de contenido + safe-area superior (iPhone en vertical). */
 #screen-select.active {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-top: 56px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
   box-sizing: border-box;
 }
 /* Solo selección: fondo fijo para que al hacer scroll no quede franja bajo la barra de serie.
@@ -1798,6 +1798,7 @@ app-card {
     align-items: center;
     gap: 4px;
     position: fixed;
+    /* Alineado bajo la barra de serie (48px contenido + safe area en su padding-top). */
     top: calc(env(safe-area-inset-top, 0px) + 52px);
     right: max(10px, env(safe-area-inset-right, 0px) + 8px);
     z-index: 1001;
