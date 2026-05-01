@@ -1,0 +1,67 @@
+<section id="screen-menu" class="screen active">
+  <div class="bg-landscape"></div>
+  <div class="menu-wrap">
+    <h1 class="game-title">
+      <span class="title-flourish">⚔</span>
+      Las Cartas de Lucas
+      <span class="title-flourish">⚔</span>
+    </h1>
+    <p class="game-subtitle">Elige tu mazo. Enfrenta al rival. Conquista la arena.</p>
+
+    <div class="menu-actions">
+      <button type="button" class="btn-primary" (click)="play()">JUGAR</button>
+      <button type="button" class="btn-secondary" (click)="toggleHow()">¿Cómo se juega?</button>
+    </div>
+
+    <div class="lang-switch" role="group" aria-label="Idioma / Language">
+      <button
+        type="button"
+        class="lang-btn"
+        [class.is-active]="i18n.lang() === 'es'"
+        data-lang="es"
+        title="Español"
+        (click)="setLang('es')"
+      >
+        ES
+      </button>
+      <button
+        type="button"
+        class="lang-btn"
+        [class.is-active]="i18n.lang() === 'en'"
+        data-lang="en"
+        title="English"
+        (click)="setLang('en')"
+      >
+        EN
+      </button>
+    </div>
+  </div>
+
+  @if (howOpen()) {
+    <div class="modal-backdrop" (click)="closeHow()">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="how-title" (click)="$event.stopPropagation()">
+        <h2 id="how-title">¿Cómo se juega?</h2>
+        <ol class="rules">
+          <li>
+            <strong>Serie al mejor de 9:</strong> gana quien consiga <strong>5 victorias</strong>; si hay empates en
+            partidas, la serie puede alargarse.
+          </li>
+          <li>
+            <strong>Nivel y presupuesto:</strong> cada carta tiene <strong>nivel</strong> 1–5. Entre partidas:
+            <strong>10 puntos mínimos</strong> + arrastre del presupuesto al empezar la batalla (menos refrescos) +
+            bono 1,2,3,5,8,13 según n.º de partida. En selección los puntos sirven para
+            <strong>refrescar la tienda</strong>. Mazo 1–10 cartas desde la tienda.
+          </li>
+          <li>
+            <strong>Gloria:</strong> +1 base, +5 victoria / +2 derrota / +3 empate; al ganar la serie, +8 extra.
+          </li>
+          <li>
+            <strong>Batalla:</strong> en cada asalto ambas cartas atacan a la vez (tipos ×1,25 / ×0,8 e habilidades).
+          </li>
+          <li><strong>Daño:</strong> ⚔️ ataque y ❤️ vida; a 0 PV la carta cae.</li>
+        </ol>
+        <button type="button" class="btn-primary" (click)="closeHow()">¡Entendido!</button>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,238 @@
+<section
+  id="screen-battle"
+  class="screen active"
+  [style.--combat-card-scale]="zoomScale()"
+>
+  <div class="bg-landscape"></div>
+
+  <header class="battle-topbar">
+    <div class="player-badge left">
+      <div class="avatar">🧑</div>
+      <div class="info">
+        <div class="name">Jugador Uno</div>
+        <div class="trophy">🏆 <span id="player-trophy">{{ game().playerTrophy }}</span></div>
+      </div>
+    </div>
+
+    <div class="round-pill">
+      <div class="series-line" id="series-line">
+        Serie: <span id="series-you">{{ game().seriesWinsP }}</span> -
+        <span id="series-rival">{{ game().seriesWinsR }}</span> · partida
+        <span id="series-game-n">{{ game().gamesInSeries + 1 }}</span> · 1.ª a {{ winsSeries }} / BO9+
+      </div>
+      <div class="ronda-label">ASALTO <span id="round-num">{{ game().round }}</span></div>
+      <div class="ronda-progress">
+        Carta <span id="round-current">{{ game().battleIdx.p + 1 }}</span> /
+        <span id="round-total">{{ game().playerDeck.length }}</span> del mazo
+      </div>
+    </div>
+
+    <div class="player-badge right">
+      <div class="info">
+        <div class="name">Rival</div>
+        <div class="trophy">🏆 <span id="rival-trophy">{{ game().rivalTrophy }}</span></div>
+      </div>
+      <div class="avatar">🥷</div>
+    </div>
+  </header>
+
+  <main class="arena">
+    <div id="player-side" class="side player-side">
+      <div class="side-scale">
+        @for (c of playerDeckRevVisible(); track c.uid) {
+          <app-card
+            [card]="c"
+            side="player"
+            [showHpBar]="true"
+            [stackStars]="c.stackStars ?? 0"
+            [statPopoverBase]="{ hp: c.catalogHp ?? c.hp, atk: c.catalogAtk ?? c.atk }"
+            [isActive]="isPlayerCardActive(c)"
+            [isDead]="isDead(c)"
+            [isVanishing]="isVanishing('player', c)"
+            [isAttacking]="game().battleUi.playerAttacking && isPlayerCardActive(c)"
+            [isTakingHit]="game().battleUi.playerTakingHit && isPlayerCardActive(c)"
+            [damagePopup]="
+              game().battleUi.playerTakingHit && isPlayerCardActive(c) ? game().battleUi.playerDamagePopup : null
+            "
+            [healPopup]="
+              game().battleUi.playerTakingHit && isPlayerCardActive(c) ? game().battleUi.playerHealPopup : null
+            "
+          />
+        }
+      </div>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div id="rival-side" class="side rival-side">
+      <div class="side-scale">
+        @for (c of rivalDeckVisible(); track c.uid) {
+          <app-card
+            [card]="c"
+            side="rival"
+            [showHpBar]="true"
+            [stackStars]="c.stackStars ?? 0"
+            [statPopoverBase]="{ hp: c.catalogHp ?? c.hp, atk: c.catalogAtk ?? c.atk }"
+            [isActive]="isRivalCardActive(c)"
+            [isDead]="isDead(c)"
+            [isVanishing]="isVanishing('rival', c)"
+            [isAttacking]="game().battleUi.rivalAttacking && isRivalCardActive(c)"
+            [isTakingHit]="game().battleUi.rivalTakingHit && isRivalCardActive(c)"
+            [damagePopup]="
+              game().battleUi.rivalTakingHit && isRivalCardActive(c) ? game().battleUi.rivalDamagePopup : null
+            "
+            [healPopup]="
+              game().battleUi.rivalTakingHit && isRivalCardActive(c) ? game().battleUi.rivalHealPopup : null
+            "
+          />
+        }
+      </div>
+    </div>
+  </main>
+
+  <div
+    id="combat-log-backdrop"
+    class="combat-log-backdrop"
+    [class.hidden]="game().combatLogView !== 'modal'"
+    [attr.aria-hidden]="game().combatLogView !== 'modal'"
+    (click)="onBackdropClick()"
+  ></div>
+  <div
+    id="combat-event-panel"
+    class="combat-event-panel"
+    [class.is-float]="game().combatLogView === 'float'"
+    [class.is-min]="game().combatLogView === 'min'"
+    [class.is-modal]="game().combatLogView === 'modal'"
+    [attr.data-ce-mode]="game().combatLogView"
+    role="region"
+    [attr.aria-label]="combatEventTitle()"
+  >
+    <div class="combat-event-header">
+      <span class="combat-event-title" id="combat-event-title">{{ combatEventTitle() }}</span>
+      <div class="combat-event-btns">
+        <button
+          type="button"
+          class="ce-mode-btn"
+          title="Minimizar"
+          [attr.aria-pressed]="game().combatLogView === 'min'"
+          (click)="setCombatLogMode('min')"
+        >
+          ─
+        </button>
+        <button
+          type="button"
+          class="ce-mode-btn"
+          title="Ventana flotante"
+          [attr.aria-pressed]="game().combatLogView === 'float'"
+          (click)="setCombatLogMode('float')"
+        >
+          ▢
+        </button>
+        <button
+          type="button"
+          class="ce-mode-btn"
+          title="Pantalla completa"
+          [attr.aria-pressed]="game().combatLogView === 'modal'"
+          (click)="setCombatLogMode('modal')"
+        >
+          ⛶
+        </button>
+      </div>
+    </div>
+    <div class="combat-event-body">
+      <div id="combat-event-log" class="combat-event-log" tabindex="0" [innerHTML]="combatLogSafe()"></div>
+    </div>
+  </div>
+
+  <div class="battle-log" id="battle-log">
+    <span class="log-text" [innerHTML]="lastLogSafe()"></span>
+  </div>
+
+  <footer class="battle-controls">
+    <div class="battle-controls-center">
+      <div class="speed-controls">
+        <button
+          type="button"
+          class="speed-btn"
+          [class.active]="game().paused"
+          data-speed="pause"
+          title="Pausar"
+          (click)="togglePause()"
+        >
+          ⏸
+        </button>
+        <button
+          type="button"
+          class="speed-btn"
+          [class.active]="!game().auto && game().speed === 1"
+          data-speed="1"
+          (click)="setSpeed(1)"
+        >
+          x1
+        </button>
+        <button
+          type="button"
+          class="speed-btn"
+          [class.active]="!game().auto && game().speed === 2"
+          data-speed="2"
+          (click)="setSpeed(2)"
+        >
+          x2
+        </button>
+        <button
+          type="button"
+          class="speed-btn"
+          [class.active]="!game().auto && game().speed === 3"
+          data-speed="3"
+          (click)="setSpeed(3)"
+        >
+          x3
+        </button>
+        <button
+          type="button"
+          class="speed-btn auto"
+          [class.active]="game().auto"
+          data-speed="auto"
+          (click)="toggleAuto()"
+        >
+          AUTO
+        </button>
+      </div>
+      <div class="combat-zoom-controls" role="group" aria-label="Zoom en combate">
+        <span class="zoom-label">Zoom</span>
+        <button
+          type="button"
+          class="zoom-level-btn"
+          data-zoom="1"
+          [class.active]="game().combatCardZoom === 1"
+          [attr.aria-pressed]="game().combatCardZoom === 1"
+          (click)="setZoom(1)"
+        >
+          1
+        </button>
+        <button
+          type="button"
+          class="zoom-level-btn"
+          data-zoom="2"
+          [class.active]="game().combatCardZoom === 2"
+          [attr.aria-pressed]="game().combatCardZoom === 2"
+          (click)="setZoom(2)"
+        >
+          2
+        </button>
+        <button
+          type="button"
+          class="zoom-level-btn"
+          data-zoom="3"
+          [class.active]="game().combatCardZoom === 3"
+          [attr.aria-pressed]="game().combatCardZoom === 3"
+          (click)="setZoom(3)"
+        >
+          3
+        </button>
+      </div>
+    </div>
+
+    <button type="button" class="btn-primary end-turn" id="btn-end-battle" (click)="endTurnQuick()">
+      FIN DEL TURNO
+    </button>
+  </footer>
+</section>

@@ -1,0 +1,180 @@
+<section id="screen-select" class="screen active">
+  <div class="bg-landscape"></div>
+  <header class="select-header">
+    <h2>Elige tu mazo</h2>
+    <p class="hint">
+      Partida <strong>{{ upcomingPartida() }}</strong> de la serie: puedes llenar hasta
+      <strong>{{ maxSlots() }} huecos</strong> (cada hueco puede acumular la misma carta para bonificar PV/ATK).
+      Solo cartas de la <strong>tienda</strong>. Los puntos sirven para <strong>refrescar</strong>.
+    </p>
+    <div class="select-budget" id="select-budget">
+      <div class="budget-line">Puntos: <span id="budget-total">{{ game().playerBudgetStart }}</span></div>
+      <div class="budget-line">
+        Gastado en refrescos: <span id="budget-spent">{{ game().shopRefreshPointsSpent }}</span> · Restante:
+        <span id="budget-left">{{ budgetLeft() }}</span>
+      </div>
+    </div>
+    <div class="select-header-actions">
+      <button type="button" class="btn-secondary select-glossary-btn" (click)="openGlossary()">
+        {{ i18n.tUi('selectGlossaryBtn') }}
+      </button>
+    </div>
+  </header>
+
+  <div class="select-body">
+    <div class="my-deck-section">
+      <h3 class="section-title">Mis cartas</h3>
+      <p class="section-hint">
+        Pulsa una carta de la <strong>tienda</strong> para añadir o apilar; pulsa un hueco lleno para quitar una copia.
+        <strong>Arrastra</strong> para reordenar huecos.
+      </p>
+      @if (maxSlots() > 0) {
+        <div
+          id="my-cards"
+          class="my-deck-row my-cards-deck"
+          cdkDropList
+          (cdkDropListDropped)="drop($event)"
+          role="region"
+          aria-label="Mis cartas"
+        >
+          @for (slot of game().deckSlots; track slot.uid) {
+            <div cdkDrag class="card-drag-wrap">
+              <app-card
+                [card]="slotViewCard(slot)"
+                side="player"
+                extraClass="card--in-my-deck"
+                [stackStars]="slotStars(slot)"
+                [statPopoverBase]="slotStatBase(slot)"
+                (cardClick)="onDeckSlotClick(slot)"
+              />
+            </div>
+          }
+          @for (p of placeholderSlots(); track p) {
+            <div class="deck-slot-placeholder" aria-hidden="true">
+              <span class="deck-slot-placeholder__dashed"></span>
+              <span class="deck-slot-placeholder__label">Vacío</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <div class="pool-section">
+      <h3 class="section-title">Tienda</h3>
+      <p class="section-hint shop-tier-hint">{{ shopHint() }}</p>
+      <div class="shop-toolbar">
+        <button
+          type="button"
+          class="btn-secondary"
+          id="btn-shop-refresh"
+          [disabled]="budgetLeft() < 1"
+          (click)="refreshShop()"
+        >
+          Refrescar tienda (−1 pt)
+        </button>
+      </div>
+      <div id="card-pool" class="card-pool">
+        @for (slot of game().shopOfferSlots; track slot.slotUid) {
+          @if (slot.card; as card) {
+            <app-card
+              [card]="card"
+              side="player"
+              [extraClass]="shopOfferExtraClass(card)"
+              [statPopoverBase]="{ hp: card.hp, atk: card.atk }"
+              (cardClick)="onPoolSlotClick(slot)"
+            />
+          } @else {
+            <div class="shop-offer-placeholder" aria-hidden="true"></div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (deckFullHint(); as hint) {
+    <div class="select-deck-full-toast" role="status" aria-live="polite">{{ hint }}</div>
+  }
+
+  <footer class="select-footer">
+    <button type="button" class="btn-secondary" (click)="backMenu()">← Volver</button>
+    <button type="button" class="btn-primary" id="btn-start-battle" [disabled]="!canStart()" (click)="startBattle()">
+      ¡A la batalla!
+    </button>
+  </footer>
+
+  @if (glossaryOpen()) {
+    <div class="select-glossary-backdrop" (click)="closeGlossary()">
+      <div
+        class="select-glossary-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="select-glossary-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="select-glossary-dialog__head">
+          <h2 id="select-glossary-title">{{ i18n.tUi('selectGlossaryTitle') }}</h2>
+          <button
+            type="button"
+            class="select-glossary-close"
+            [attr.aria-label]="i18n.tUi('selectGlossaryClose')"
+            (click)="closeGlossary()"
+          >
+            ×
+          </button>
+        </div>
+        <p class="select-glossary-intro">{{ i18n.tUi('selectGlossaryIntro') }}</p>
+
+        <div class="select-glossary-scroll">
+          <section class="ref-section" aria-labelledby="ref-h-types">
+            <h3 id="ref-h-types" class="ref-section__title">{{ i18n.tUi('refSectionTypes') }}</h3>
+            <div class="ref-table-wrap">
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ i18n.tUi('refColName') }}</th>
+                    <th scope="col">{{ i18n.tUi('refColDesc') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (code of refOrder.type; track code) {
+                    <tr>
+                      <td class="ref-table__name">{{ i18n.t('type', code) }}</td>
+                      <td>{{ i18n.tReferenceDesc('type', code) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="ref-section" aria-labelledby="ref-h-abilities">
+            <h3 id="ref-h-abilities" class="ref-section__title">{{ i18n.tUi('refSectionAbilities') }}</h3>
+            <div class="ref-table-wrap">
+              <table class="ref-table ref-table--abilities">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ i18n.tUi('refColName') }}</th>
+                    <th scope="col">{{ i18n.tUi('refColDesc') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (code of refOrder.ability; track code) {
+                    <tr>
+                      <td class="ref-table__name">{{ i18n.t('ability', code) }}</td>
+                      <td>{{ i18n.tReferenceDesc('ability', code) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="select-glossary-footer">
+          <button type="button" class="btn-primary" (click)="closeGlossary()">
+            {{ i18n.tUi('selectGlossaryClose') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

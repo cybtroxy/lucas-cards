@@ -1,0 +1,128 @@
+<div class="card-shell">
+  <div
+    [attr.class]="classNames()"
+    [style.--art-bg]="'var(--t-' + card().type + ')'"
+    [attr.data-uid]="cardUid()"
+    [attr.data-card-id]="card().id"
+    (click)="onClick()"
+    (mouseenter)="onPopoverEnter($event)"
+    (mouseleave)="onPopoverLeave()"
+    role="presentation"
+  >
+    @if (displayStars() > 0) {
+      <div class="card-stack-stars" aria-hidden="true">
+        @for (_ of starMarks(); track $index) {
+          <span class="card-stack-stars__icon">★</span>
+        }
+      </div>
+    }
+    <div class="card-inner">
+      <div class="card-level" title="Nivel">{{ card().level || 1 }}</div>
+      <div class="name-bar">{{ card().name }}</div>
+      <div class="art">
+        @if (card().type) {
+          <span class="type-badge" [title]="i18n.tUi('typeBadgeTitle')">{{ i18n.t('type', card().type) }}</span>
+        }
+        @if (artIsImage()) {
+          <img class="art-image" [src]="card().art" [alt]="card().name" loading="lazy" decoding="async" />
+        } @else {
+          <span class="emoji">{{ card().art || '❔' }}</span>
+        }
+      </div>
+      <div class="card-meta-row">
+        <span class="meta-pill">{{ i18n.t('ability', card().ability) }}</span>
+      </div>
+      <div class="stats">
+        <div class="stat atk"><span class="ico">⚔️</span><span class="val-atk">{{ card().atk }}</span></div>
+        <div class="stat hp"><span class="ico">❤️</span><span class="val-hp">{{ displayStatHp() }}</span></div>
+      </div>
+    </div>
+    @let pop = damagePopup();
+    @let heal = healPopup();
+    @if ((pop && pop.dmg > 0) || (heal != null && heal > 0)) {
+      <div class="hit-popups" aria-hidden="true">
+        @if (pop && pop.dmg > 0) {
+          <div
+            class="hit-popup hit-popup--damage"
+            [class.super]="pop.label === 'super'"
+            [class.weak]="pop.label === 'weak'"
+          >
+            -{{ pop.dmg }}
+          </div>
+        }
+        @if (heal != null && heal > 0) {
+          <div class="hit-popup hit-popup--heal">+{{ heal }}</div>
+        }
+      </div>
+    }
+    @if (hpBarVisible()) {
+      <div class="card-hpbar" aria-hidden="true">
+        <div
+          class="card-hpbar__fill"
+          [style.width.%]="hpPct()"
+          [style.background]="hpFillStyle()"
+        ></div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (statPopoverEnabled()) {
+  <div
+    #statPopover
+    class="card-stat-popover"
+    [ngStyle]="popoverStyle()"
+    [attr.aria-hidden]="!popoverVisible()"
+  >
+    <div class="card-stat-popover__title">{{ card().name }}</div>
+    <div class="card-stat-popover__stats">
+      @let base = statPopoverBase();
+      @if (base && (card().hp !== base.hp || card().atk !== base.atk)) {
+        <div class="card-stat-popover__row">
+          <span class="card-stat-popover__label">ATQ</span>
+          <span class="card-stat-popover__val">
+            @if (card().atk !== base.atk) {
+              <span class="muted">{{ base.atk }}</span>
+              → <strong>{{ card().atk }}</strong>
+              <span class="tag">+50%</span>
+            } @else {
+              <strong>{{ card().atk }}</strong>
+            }
+          </span>
+        </div>
+        <div class="card-stat-popover__row">
+          <span class="card-stat-popover__label">PV</span>
+          <span class="card-stat-popover__val">
+            <span class="muted">{{ base.hp }}</span>
+            → <strong>{{ card().hp }}</strong>
+            @if (displayStars() === 1) {
+              <span class="tag">+30%</span>
+            }
+            @if (displayStars() === 2) {
+              <span class="tag">+50%</span>
+            }
+          </span>
+        </div>
+      } @else {
+        <div class="card-stat-popover__row">
+          <span class="card-stat-popover__label">ATQ</span>
+          <span class="card-stat-popover__val"><strong>{{ card().atk }}</strong></span>
+        </div>
+        <div class="card-stat-popover__row">
+          <span class="card-stat-popover__label">PV</span>
+          <span class="card-stat-popover__val"><strong>{{ card().hp }}</strong></span>
+        </div>
+      }
+    </div>
+    <div class="card-stat-popover__meta">
+      <div>
+        @if (card().type) {
+          {{ i18n.t('type', card().type) }}
+          ·
+        }
+        Niv. {{ card().level || 1 }}
+      </div>
+      <div class="card-stat-popover__ability">{{ i18n.t('ability', card().ability) }}</div>
+    </div>
+  </div>
+}

@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+#screen-result.screen {
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px 32px;
+  box-sizing: border-box;
+}
+
+.result-combat-log-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(5, 8, 20, 0.7);
+}
+
+.result-combat-log-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 201;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.result-combat-log-dialog-inner {
+  pointer-events: auto;
+  max-width: min(720px, 100% - 32px);
+  max-height: 80vh;
+  overflow: auto;
+  background: linear-gradient(180deg, #1a2547, #131c38);
+  border: 1px solid #3a4a78;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.result-combat-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.result-combat-log-close {
+  background: none;
+  border: none;
+  color: var(--ink, #eaf0ff);
+  font-size: 24px;
+  cursor: pointer;
+}

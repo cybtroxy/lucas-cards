@@ -1,0 +1,62 @@
+@if (result(); as r) {
+  <section id="screen-result" class="screen active">
+    <div class="bg-landscape"></div>
+    <div class="result-wrap">
+      <div id="result-emoji" class="result-emoji">{{ r.emoji }}</div>
+      <h2 id="result-title">{{ r.title }}</h2>
+      <p id="result-subtitle">{{ r.subtitle }}</p>
+      <p class="result-series-note" id="result-series-note">{{ r.seriesNote }}</p>
+
+      <div class="result-stats" id="result-stats">
+        @for (row of r.statsRows; track row.label) {
+          <div class="result-stat">
+            <div class="label">{{ row.label }}</div>
+            <div class="value">{{ row.value }}</div>
+          </div>
+        }
+      </div>
+
+      <p class="result-combat-log-wrap">
+        <button type="button" class="btn-secondary" id="btn-result-combat-log" (click)="openLog()">
+          {{ i18n.isEn() ? 'View battle log' : 'Ver registro del combate' }}
+        </button>
+      </p>
+
+      <div class="menu-actions result-actions">
+        @if (!r.seriesOver) {
+          <button type="button" class="btn-primary" id="btn-next-match" (click)="nextMatch()">Siguiente partida</button>
+        }
+        @if (r.seriesOver) {
+          <button type="button" class="btn-primary" id="btn-new-series" (click)="newSeries()">Nueva serie</button>
+        }
+        <button type="button" class="btn-secondary" id="btn-result-menu" (click)="backMenu()">Volver al menú</button>
+      </div>
+    </div>
+  </section>
+}
+
+@if (combatLogOpen()) {
+  <div
+    id="result-combat-log-backdrop"
+    class="result-combat-log-backdrop"
+    aria-hidden="false"
+    (click)="closeLog()"
+  ></div>
+  <div
+    id="result-combat-log-dialog"
+    class="result-combat-log-dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'result-combat-log-heading'"
+    aria-hidden="false"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="result-combat-log-dialog-inner">
+      <header class="result-combat-log-header">
+        <h3 id="result-combat-log-heading">{{ headingLog() }}</h3>
+        <button type="button" class="result-combat-log-close" title="Cerrar" (click)="closeLog()">×</button>
+      </header>
+      <div id="result-combat-log-content" class="result-combat-log-content combat-event-log" [innerHTML]="logSnapshotSafe()"></div>
+    </div>
+  </div>
+}

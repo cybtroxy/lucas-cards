@@ -1,0 +1,1002 @@
+[
+  {
+    "id": "c1_01",
+    "name": "Elegido 1-01",
+    "type": "light",
+    "ability": "life_steal",
+    "level": 1,
+    "atk": 2,
+    "hp": 6,
+    "art": "⚔️"
+  },
+  {
+    "id": "c1_02",
+    "name": "Elegido 1-02",
+    "type": "nature",
+    "ability": "first_strike",
+    "level": 1,
+    "atk": 3,
+    "hp": 7,
+    "art": "🏹"
+  },
+  {
+    "id": "c1_03",
+    "name": "Elegido 1-03",
+    "type": "water",
+    "ability": "stun",
+    "level": 1,
+    "atk": 4,
+    "hp": 8,
+    "art": "🛡️"
+  },
+  {
+    "id": "c1_04",
+    "name": "Elegido 1-04",
+    "type": "alien",
+    "ability": "buff_next",
+    "level": 1,
+    "atk": 1,
+    "hp": 9,
+    "art": "🗡️"
+  },
+  {
+    "id": "c1_05",
+    "name": "Elegido 1-05",
+    "type": "air",
+    "ability": "armor",
+    "level": 1,
+    "atk": 2,
+    "hp": 11,
+    "art": "🔱"
+  },
+  {
+    "id": "c1_06",
+    "name": "Elegido 1-06",
+    "type": "fire",
+    "ability": "crit_chance",
+    "level": 1,
+    "atk": 3,
+    "hp": 6,
+    "art": "🪓"
+  },
+  {
+    "id": "c1_07",
+    "name": "Elegido 1-07",
+    "type": "water",
+    "ability": "execute",
+    "level": 1,
+    "atk": 4,
+    "hp": 7,
+    "art": "⚒️"
+  },
+  {
+    "id": "c1_08",
+    "name": "Elegido 1-08",
+    "type": "earth",
+    "ability": "psychic_blast",
+    "level": 1,
+    "atk": 1,
+    "hp": 8,
+    "art": "🔨"
+  },
+  {
+    "id": "c1_09",
+    "name": "Elegido 1-09",
+    "type": "metal",
+    "ability": "revive",
+    "level": 1,
+    "atk": 2,
+    "hp": 10,
+    "art": "⛏️"
+  },
+  {
+    "id": "c1_10",
+    "name": "Elegido 1-10",
+    "type": "love",
+    "ability": "pierce",
+    "level": 1,
+    "atk": 3,
+    "hp": 11,
+    "art": "🪚"
+  },
+  {
+    "id": "c1_11",
+    "name": "Elegido 1-11",
+    "type": "energy",
+    "ability": "shield",
+    "level": 1,
+    "atk": 4,
+    "hp": 12,
+    "art": "🪤"
+  },
+  {
+    "id": "c1_12",
+    "name": "Elegido 1-12",
+    "type": "light",
+    "ability": "burn",
+    "level": 1,
+    "atk": 1,
+    "hp": 7,
+    "art": "🧨"
+  },
+  {
+    "id": "c1_13",
+    "name": "Elegido 1-13",
+    "type": "nature",
+    "ability": "heal",
+    "level": 1,
+    "atk": 2,
+    "hp": 9,
+    "art": "✨"
+  },
+  {
+    "id": "c1_14",
+    "name": "Elegido 1-14",
+    "type": "water",
+    "ability": "damage_reduce",
+    "level": 1,
+    "atk": 3,
+    "hp": 10,
+    "art": "🌟"
+  },
+  {
+    "id": "c1_15",
+    "name": "Elegido 1-15",
+    "type": "alien",
+    "ability": "life_steal",
+    "level": 1,
+    "atk": 4,
+    "hp": 11,
+    "art": "💫"
+  },
+  {
+    "id": "c1_16",
+    "name": "Elegido 1-16",
+    "type": "air",
+    "ability": "first_strike",
+    "level": 1,
+    "atk": 1,
+    "hp": 12,
+    "art": "⭐"
+  },
+  {
+    "id": "c1_17",
+    "name": "Elegido 1-17",
+    "type": "fire",
+    "ability": "stun",
+    "level": 1,
+    "atk": 2,
+    "hp": 14,
+    "art": "🌙"
+  },
+  {
+    "id": "c1_18",
+    "name": "Elegido 1-18",
+    "type": "water",
+    "ability": "buff_next",
+    "level": 1,
+    "atk": 3,
+    "hp": 9,
+    "art": "☀️"
+  },
+  {
+    "id": "c1_19",
+    "name": "Elegido 1-19",
+    "type": "earth",
+    "ability": "armor",
+    "level": 1,
+    "atk": 4,
+    "hp": 10,
+    "art": "🌈"
+  },
+  {
+    "id": "c1_20",
+    "name": "Elegido 1-20",
+    "type": "metal",
+    "ability": "crit_chance",
+    "level": 1,
+    "atk": 1,
+    "hp": 11,
+    "art": "☄️"
+  },
+  {
+    "id": "c2_01",
+    "name": "Elegido 2-01",
+    "type": "love",
+    "ability": "execute",
+    "level": 2,
+    "atk": 4,
+    "hp": 8,
+    "art": "🔥"
+  },
+  {
+    "id": "c2_02",
+    "name": "Elegido 2-02",
+    "type": "energy",
+    "ability": "psychic_blast",
+    "level": 2,
+    "atk": 5,
+    "hp": 9,
+    "art": "💧"
+  },
+  {
+    "id": "c2_03",
+    "name": "Elegido 2-03",
+    "type": "light",
+    "ability": "revive",
+    "level": 2,
+    "atk": 6,
+    "hp": 10,
+    "art": "🌊"
+  },
+  {
+    "id": "c2_04",
+    "name": "Elegido 2-04",
+    "type": "nature",
+    "ability": "pierce",
+    "level": 2,
+    "atk": 3,
+    "hp": 11,
+    "art": "❄️"
+  },
+  {
+    "id": "c2_05",
+    "name": "Elegido 2-05",
+    "type": "water",
+    "ability": "shield",
+    "level": 2,
+    "atk": 4,
+    "hp": 13,
+    "art": "🌪️"
+  },
+  {
+    "id": "c2_06",
+    "name": "Elegido 2-06",
+    "type": "alien",
+    "ability": "burn",
+    "level": 2,
+    "atk": 5,
+    "hp": 8,
+    "art": "⚡"
+  },
+  {
+    "id": "c2_07",
+    "name": "Elegido 2-07",
+    "type": "air",
+    "ability": "heal",
+    "level": 2,
+    "atk": 6,
+    "hp": 9,
+    "art": "🌋"
+  },
+  {
+    "id": "c2_08",
+    "name": "Elegido 2-08",
+    "type": "fire",
+    "ability": "damage_reduce",
+    "level": 2,
+    "atk": 3,
+    "hp": 10,
+    "art": "🗻"
+  },
+  {
+    "id": "c2_09",
+    "name": "Elegido 2-09",
+    "type": "water",
+    "ability": "life_steal",
+    "level": 2,
+    "atk": 4,
+    "hp": 12,
+    "art": "⛰️"
+  },
+  {
+    "id": "c2_10",
+    "name": "Elegido 2-10",
+    "type": "earth",
+    "ability": "first_strike",
+    "level": 2,
+    "atk": 5,
+    "hp": 13,
+    "art": "🏔️"
+  },
+  {
+    "id": "c2_11",
+    "name": "Elegido 2-11",
+    "type": "metal",
+    "ability": "stun",
+    "level": 2,
+    "atk": 6,
+    "hp": 14,
+    "art": "🐉"
+  },
+  {
+    "id": "c2_12",
+    "name": "Elegido 2-12",
+    "type": "love",
+    "ability": "buff_next",
+    "level": 2,
+    "atk": 3,
+    "hp": 9,
+    "art": "🦄"
+  },
+  {
+    "id": "c2_13",
+    "name": "Elegido 2-13",
+    "type": "energy",
+    "ability": "armor",
+    "level": 2,
+    "atk": 4,
+    "hp": 11,
+    "art": "🦅"
+  },
+  {
+    "id": "c2_14",
+    "name": "Elegido 2-14",
+    "type": "light",
+    "ability": "crit_chance",
+    "level": 2,
+    "atk": 5,
+    "hp": 12,
+    "art": "🦇"
+  },
+  {
+    "id": "c2_15",
+    "name": "Elegido 2-15",
+    "type": "nature",
+    "ability": "execute",
+    "level": 2,
+    "atk": 6,
+    "hp": 13,
+    "art": "🦉"
+  },
+  {
+    "id": "c2_16",
+    "name": "Elegido 2-16",
+    "type": "water",
+    "ability": "psychic_blast",
+    "level": 2,
+    "atk": 3,
+    "hp": 14,
+    "art": "🦊"
+  },
+  {
+    "id": "c2_17",
+    "name": "Elegido 2-17",
+    "type": "alien",
+    "ability": "revive",
+    "level": 2,
+    "atk": 4,
+    "hp": 16,
+    "art": "🦁"
+  },
+  {
+    "id": "c2_18",
+    "name": "Elegido 2-18",
+    "type": "air",
+    "ability": "pierce",
+    "level": 2,
+    "atk": 5,
+    "hp": 11,
+    "art": "🐯"
+  },
+  {
+    "id": "c2_19",
+    "name": "Elegido 2-19",
+    "type": "fire",
+    "ability": "shield",
+    "level": 2,
+    "atk": 6,
+    "hp": 12,
+    "art": "🐻"
+  },
+  {
+    "id": "c2_20",
+    "name": "Elegido 2-20",
+    "type": "water",
+    "ability": "burn",
+    "level": 2,
+    "atk": 3,
+    "hp": 13,
+    "art": "🐼"
+  },
+  {
+    "id": "c3_01",
+    "name": "Elegido 3-01",
+    "type": "earth",
+    "ability": "heal",
+    "level": 3,
+    "atk": 6,
+    "hp": 10,
+    "art": "🐺"
+  },
+  {
+    "id": "c3_02",
+    "name": "Elegido 3-02",
+    "type": "metal",
+    "ability": "damage_reduce",
+    "level": 3,
+    "atk": 7,
+    "hp": 11,
+    "art": "🦌"
+  },
+  {
+    "id": "c3_03",
+    "name": "Elegido 3-03",
+    "type": "love",
+    "ability": "life_steal",
+    "level": 3,
+    "atk": 8,
+    "hp": 12,
+    "art": "🦬"
+  },
+  {
+    "id": "c3_04",
+    "name": "Elegido 3-04",
+    "type": "energy",
+    "ability": "first_strike",
+    "level": 3,
+    "atk": 5,
+    "hp": 13,
+    "art": "🐘"
+  },
+  {
+    "id": "c3_05",
+    "name": "Elegido 3-05",
+    "type": "light",
+    "ability": "stun",
+    "level": 3,
+    "atk": 6,
+    "hp": 15,
+    "art": "🦏"
+  },
+  {
+    "id": "c3_06",
+    "name": "Elegido 3-06",
+    "type": "nature",
+    "ability": "buff_next",
+    "level": 3,
+    "atk": 7,
+    "hp": 10,
+    "art": "🦛"
+  },
+  {
+    "id": "c3_07",
+    "name": "Elegido 3-07",
+    "type": "water",
+    "ability": "armor",
+    "level": 3,
+    "atk": 8,
+    "hp": 11,
+    "art": "🦒"
+  },
+  {
+    "id": "c3_08",
+    "name": "Elegido 3-08",
+    "type": "alien",
+    "ability": "crit_chance",
+    "level": 3,
+    "atk": 5,
+    "hp": 12,
+    "art": "🦘"
+  },
+  {
+    "id": "c3_09",
+    "name": "Elegido 3-09",
+    "type": "air",
+    "ability": "execute",
+    "level": 3,
+    "atk": 6,
+    "hp": 14,
+    "art": "🦡"
+  },
+  {
+    "id": "c3_10",
+    "name": "Elegido 3-10",
+    "type": "fire",
+    "ability": "psychic_blast",
+    "level": 3,
+    "atk": 7,
+    "hp": 15,
+    "art": "🦦"
+  },
+  {
+    "id": "c3_11",
+    "name": "Elegido 3-11",
+    "type": "water",
+    "ability": "revive",
+    "level": 3,
+    "atk": 8,
+    "hp": 16,
+    "art": "🐍"
+  },
+  {
+    "id": "c3_12",
+    "name": "Elegido 3-12",
+    "type": "earth",
+    "ability": "pierce",
+    "level": 3,
+    "atk": 5,
+    "hp": 11,
+    "art": "🦎"
+  },
+  {
+    "id": "c3_13",
+    "name": "Elegido 3-13",
+    "type": "metal",
+    "ability": "shield",
+    "level": 3,
+    "atk": 6,
+    "hp": 13,
+    "art": "🐢"
+  },
+  {
+    "id": "c3_14",
+    "name": "Elegido 3-14",
+    "type": "love",
+    "ability": "burn",
+    "level": 3,
+    "atk": 7,
+    "hp": 14,
+    "art": "🐊"
+  },
+  {
+    "id": "c3_15",
+    "name": "Elegido 3-15",
+    "type": "energy",
+    "ability": "heal",
+    "level": 3,
+    "atk": 8,
+    "hp": 15,
+    "art": "🦈"
+  },
+  {
+    "id": "c3_16",
+    "name": "Elegido 3-16",
+    "type": "light",
+    "ability": "damage_reduce",
+    "level": 3,
+    "atk": 5,
+    "hp": 16,
+    "art": "🐋"
+  },
+  {
+    "id": "c3_17",
+    "name": "Elegido 3-17",
+    "type": "nature",
+    "ability": "life_steal",
+    "level": 3,
+    "atk": 6,
+    "hp": 18,
+    "art": "🐬"
+  },
+  {
+    "id": "c3_18",
+    "name": "Elegido 3-18",
+    "type": "water",
+    "ability": "first_strike",
+    "level": 3,
+    "atk": 7,
+    "hp": 13,
+    "art": "🐙"
+  },
+  {
+    "id": "c3_19",
+    "name": "Elegido 3-19",
+    "type": "alien",
+    "ability": "stun",
+    "level": 3,
+    "atk": 8,
+    "hp": 14,
+    "art": "🦑"
+  },
+  {
+    "id": "c3_20",
+    "name": "Elegido 3-20",
+    "type": "air",
+    "ability": "buff_next",
+    "level": 3,
+    "atk": 5,
+    "hp": 15,
+    "art": "🦀"
+  },
+  {
+    "id": "c4_01",
+    "name": "Elegido 4-01",
+    "type": "fire",
+    "ability": "armor",
+    "level": 4,
+    "atk": 8,
+    "hp": 12,
+    "art": "🦞"
+  },
+  {
+    "id": "c4_02",
+    "name": "Elegido 4-02",
+    "type": "water",
+    "ability": "crit_chance",
+    "level": 4,
+    "atk": 9,
+    "hp": 13,
+    "art": "🦐"
+  },
+  {
+    "id": "c4_03",
+    "name": "Elegido 4-03",
+    "type": "earth",
+    "ability": "execute",
+    "level": 4,
+    "atk": 10,
+    "hp": 14,
+    "art": "🪼"
+  },
+  {
+    "id": "c4_04",
+    "name": "Elegido 4-04",
+    "type": "metal",
+    "ability": "psychic_blast",
+    "level": 4,
+    "atk": 7,
+    "hp": 15,
+    "art": "🐚"
+  },
+  {
+    "id": "c4_05",
+    "name": "Elegido 4-05",
+    "type": "love",
+    "ability": "revive",
+    "level": 4,
+    "atk": 8,
+    "hp": 17,
+    "art": "🪸"
+  },
+  {
+    "id": "c4_06",
+    "name": "Elegido 4-06",
+    "type": "energy",
+    "ability": "pierce",
+    "level": 4,
+    "atk": 9,
+    "hp": 12,
+    "art": "🌲"
+  },
+  {
+    "id": "c4_07",
+    "name": "Elegido 4-07",
+    "type": "light",
+    "ability": "shield",
+    "level": 4,
+    "atk": 10,
+    "hp": 13,
+    "art": "🌳"
+  },
+  {
+    "id": "c4_08",
+    "name": "Elegido 4-08",
+    "type": "nature",
+    "ability": "burn",
+    "level": 4,
+    "atk": 7,
+    "hp": 14,
+    "art": "🌴"
+  },
+  {
+    "id": "c4_09",
+    "name": "Elegido 4-09",
+    "type": "water",
+    "ability": "heal",
+    "level": 4,
+    "atk": 8,
+    "hp": 16,
+    "art": "🌵"
+  },
+  {
+    "id": "c4_10",
+    "name": "Elegido 4-10",
+    "type": "alien",
+    "ability": "damage_reduce",
+    "level": 4,
+    "atk": 9,
+    "hp": 17,
+    "art": "🍄"
+  },
+  {
+    "id": "c4_11",
+    "name": "Elegido 4-11",
+    "type": "air",
+    "ability": "life_steal",
+    "level": 4,
+    "atk": 10,
+    "hp": 18,
+    "art": "🌺"
+  },
+  {
+    "id": "c4_12",
+    "name": "Elegido 4-12",
+    "type": "fire",
+    "ability": "first_strike",
+    "level": 4,
+    "atk": 7,
+    "hp": 13,
+    "art": "🌻"
+  },
+  {
+    "id": "c4_13",
+    "name": "Elegido 4-13",
+    "type": "water",
+    "ability": "stun",
+    "level": 4,
+    "atk": 8,
+    "hp": 15,
+    "art": "🌼"
+  },
+  {
+    "id": "c4_14",
+    "name": "Elegido 4-14",
+    "type": "earth",
+    "ability": "buff_next",
+    "level": 4,
+    "atk": 9,
+    "hp": 16,
+    "art": "🌷"
+  },
+  {
+    "id": "c4_15",
+    "name": "Elegido 4-15",
+    "type": "metal",
+    "ability": "armor",
+    "level": 4,
+    "atk": 10,
+    "hp": 17,
+    "art": "🌹"
+  },
+  {
+    "id": "c4_16",
+    "name": "Elegido 4-16",
+    "type": "love",
+    "ability": "crit_chance",
+    "level": 4,
+    "atk": 7,
+    "hp": 18,
+    "art": "💐"
+  },
+  {
+    "id": "c4_17",
+    "name": "Elegido 4-17",
+    "type": "energy",
+    "ability": "execute",
+    "level": 4,
+    "atk": 8,
+    "hp": 20,
+    "art": "🪻"
+  },
+  {
+    "id": "c4_18",
+    "name": "Elegido 4-18",
+    "type": "light",
+    "ability": "psychic_blast",
+    "level": 4,
+    "atk": 9,
+    "hp": 15,
+    "art": "🥀"
+  },
+  {
+    "id": "c4_19",
+    "name": "Elegido 4-19",
+    "type": "nature",
+    "ability": "revive",
+    "level": 4,
+    "atk": 10,
+    "hp": 16,
+    "art": "🌾"
+  },
+  {
+    "id": "c4_20",
+    "name": "Elegido 4-20",
+    "type": "water",
+    "ability": "pierce",
+    "level": 4,
+    "atk": 7,
+    "hp": 17,
+    "art": "🌿"
+  },
+  {
+    "id": "c5_01",
+    "name": "Elegido 5-01",
+    "type": "alien",
+    "ability": "shield",
+    "level": 5,
+    "atk": 10,
+    "hp": 14,
+    "art": "🎭"
+  },
+  {
+    "id": "c5_02",
+    "name": "Elegido 5-02",
+    "type": "air",
+    "ability": "burn",
+    "level": 5,
+    "atk": 11,
+    "hp": 15,
+    "art": "🎪"
+  },
+  {
+    "id": "c5_03",
+    "name": "Elegido 5-03",
+    "type": "fire",
+    "ability": "heal",
+    "level": 5,
+    "atk": 12,
+    "hp": 16,
+    "art": "🎨"
+  },
+  {
+    "id": "c5_04",
+    "name": "Elegido 5-04",
+    "type": "water",
+    "ability": "damage_reduce",
+    "level": 5,
+    "atk": 9,
+    "hp": 17,
+    "art": "🎬"
+  },
+  {
+    "id": "c5_05",
+    "name": "Elegido 5-05",
+    "type": "earth",
+    "ability": "life_steal",
+    "level": 5,
+    "atk": 10,
+    "hp": 19,
+    "art": "🎮"
+  },
+  {
+    "id": "c5_06",
+    "name": "Elegido 5-06",
+    "type": "metal",
+    "ability": "first_strike",
+    "level": 5,
+    "atk": 11,
+    "hp": 14,
+    "art": "🕹️"
+  },
+  {
+    "id": "c5_07",
+    "name": "Elegido 5-07",
+    "type": "love",
+    "ability": "stun",
+    "level": 5,
+    "atk": 12,
+    "hp": 15,
+    "art": "🎲"
+  },
+  {
+    "id": "c5_08",
+    "name": "Elegido 5-08",
+    "type": "energy",
+    "ability": "buff_next",
+    "level": 5,
+    "atk": 9,
+    "hp": 16,
+    "art": "🎯"
+  },
+  {
+    "id": "c5_09",
+    "name": "Elegido 5-09",
+    "type": "light",
+    "ability": "armor",
+    "level": 5,
+    "atk": 10,
+    "hp": 18,
+    "art": "🎳"
+  },
+  {
+    "id": "c5_10",
+    "name": "Elegido 5-10",
+    "type": "nature",
+    "ability": "crit_chance",
+    "level": 5,
+    "atk": 11,
+    "hp": 19,
+    "art": "🏆"
+  },
+  {
+    "id": "c5_11",
+    "name": "Elegido 5-11",
+    "type": "water",
+    "ability": "execute",
+    "level": 5,
+    "atk": 12,
+    "hp": 20,
+    "art": "🧿"
+  },
+  {
+    "id": "c5_12",
+    "name": "Elegido 5-12",
+    "type": "alien",
+    "ability": "psychic_blast",
+    "level": 5,
+    "atk": 9,
+    "hp": 15,
+    "art": "🔮"
+  },
+  {
+    "id": "c5_13",
+    "name": "Elegido 5-13",
+    "type": "air",
+    "ability": "revive",
+    "level": 5,
+    "atk": 10,
+    "hp": 17,
+    "art": "🪄"
+  },
+  {
+    "id": "c5_14",
+    "name": "Elegido 5-14",
+    "type": "fire",
+    "ability": "pierce",
+    "level": 5,
+    "atk": 11,
+    "hp": 18,
+    "art": "📿"
+  },
+  {
+    "id": "c5_15",
+    "name": "Elegido 5-15",
+    "type": "water",
+    "ability": "shield",
+    "level": 5,
+    "atk": 12,
+    "hp": 19,
+    "art": "🏺"
+  },
+  {
+    "id": "c5_16",
+    "name": "Elegido 5-16",
+    "type": "earth",
+    "ability": "burn",
+    "level": 5,
+    "atk": 9,
+    "hp": 20,
+    "art": "⚗️"
+  },
+  {
+    "id": "c5_17",
+    "name": "Elegido 5-17",
+    "type": "metal",
+    "ability": "heal",
+    "level": 5,
+    "atk": 10,
+    "hp": 22,
+    "art": "🧪"
+  },
+  {
+    "id": "c5_18",
+    "name": "Elegido 5-18",
+    "type": "love",
+    "ability": "damage_reduce",
+    "level": 5,
+    "atk": 11,
+    "hp": 17,
+    "art": "🔭"
+  },
+  {
+    "id": "c5_19",
+    "name": "Elegido 5-19",
+    "type": "energy",
+    "ability": "life_steal",
+    "level": 5,
+    "atk": 12,
+    "hp": 18,
+    "art": "🗝️"
+  },
+  {
+    "id": "c5_20",
+    "name": "Elegido 5-20",
+    "type": "light",
+    "ability": "first_strike",
+    "level": 5,
+    "atk": 9,
+    "hp": 19,
+    "art": "🧭"
+  }
+]

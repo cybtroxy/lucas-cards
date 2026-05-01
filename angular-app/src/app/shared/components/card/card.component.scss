@@ -1,0 +1,118 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.card-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  --card-shell-inner-gap: 6px;
+  gap: var(--card-shell-inner-gap);
+}
+
+/* Fuera de .card-inner: centradas abajo; ~40% del glifo bajo el borde interior. */
+.card > .card-stack-stars {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: calc(-3px - 0.4em);
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 26px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.88));
+}
+
+.card > .card-stack-stars .card-stack-stars__icon {
+  font-size: 1em;
+  line-height: 1;
+  color: #fde047;
+  text-shadow:
+    0 0 10px rgba(234, 179, 8, 0.95),
+    0 2px 0 #854d0e;
+}
+
+.card-stat-popover {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.97), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(245, 196, 81, 0.35);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  box-sizing: border-box;
+}
+
+.card-stat-popover__title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fde68a;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.card-stat-popover__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.card-stat-popover__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.card-stat-popover__label {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.card-stat-popover__val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-stat-popover__val .muted {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.card-stat-popover__val .tag {
+  margin-left: 4px;
+  font-size: 10px;
+  color: #86efac;
+  font-weight: 700;
+}
+
+.card-stat-popover__meta {
+  font-size: 10px;
+  line-height: 1.45;
+  color: #94a3b8;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 8px;
+}
+
+.card-stat-popover__ability {
+  margin-top: 4px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
