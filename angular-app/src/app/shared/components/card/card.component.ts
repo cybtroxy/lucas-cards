@@ -15,6 +15,7 @@ import type { BattleCard } from '../../../core/models/battle-card.model';
 import type { Card } from '../../../core/models/card.model';
 import { I18nService } from '../../../core/services/i18n.service';
 import { isLikelyImageSource } from '../../utils/art-util';
+import { CardStatPopoverCoordinator } from './card-stat-popover.coordinator';
 
 @Component({
   selector: 'app-card',
@@ -28,6 +29,7 @@ export class CardComponent implements OnDestroy {
   private readonly doc = inject(DOCUMENT);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly popoverCoordinator = inject(CardStatPopoverCoordinator);
   private readonly popoverRef = viewChild<ElementRef<HTMLElement>>('statPopover');
 
   card = input.required<Card | BattleCard>();
@@ -55,8 +57,16 @@ export class CardComponent implements OnDestroy {
   /** Colapso en host cuando está oculto (no reserva espacio). */
   protected readonly popoverStyle = signal<Record<string, string>>(this.hiddenPopoverStyle());
 
-  ngOnDestroy(): void {
+  /** Cierra este popover y libera el coordinador (también se usa para cerrar otros al abrir uno nuevo). */
+  private readonly dismissPopover = (): void => {
     this.restorePopoverToHost();
+    this.popoverVisible.set(false);
+    this.popoverStyle.set(this.hiddenPopoverStyle());
+    this.popoverCoordinator.release(this.dismissPopover);
+  };
+
+  ngOnDestroy(): void {
+    this.dismissPopover();
   }
 
   protected artIsImage = computed(() => isLikelyImageSource(this.card().art));
@@ -124,6 +134,7 @@ export class CardComponent implements OnDestroy {
     if (!this.statPopoverEnabled()) return;
     const el = ev.currentTarget as HTMLElement | null;
     if (!el) return;
+    this.popoverCoordinator.takeover(this.dismissPopover);
     this.popoverVisible.set(true);
     this.cdr.markForCheck();
     requestAnimationFrame(() => {
@@ -137,9 +148,7 @@ export class CardComponent implements OnDestroy {
   }
 
   onPopoverLeave(): void {
-    this.restorePopoverToHost();
-    this.popoverVisible.set(false);
-    this.popoverStyle.set(this.hiddenPopoverStyle());
+    this.dismissPopover();
   }
 
   private hiddenPopoverStyle(): Record<string, string> {

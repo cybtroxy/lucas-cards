@@ -18,15 +18,15 @@ import { I18nService } from './i18n.service';
 import type { StrikeParticipant } from '../engine/combat.engine';
 import { applySimultaneousExchange, sumAttackerHealFromStrikeDetail } from '../engine/combat.engine';
 import {
-  applyBudgetAfterGame,
+  applyCoinsAfterGame,
   awardGloryAfterPartida,
-  budgetBonusAfterPartida,
+  coinsBonusAfterPartida,
   DEFAULT_COMBAT_ZOOM,
-  ensureMinBudget,
+  ensureMinCoins,
   fillShopOffers,
   MAX_COPIES_PER_DECK_SLOT_STACK,
   MAX_DUEL_ASALTOS,
-  MIN_BASE_BUDGET_PER_PARTIDA,
+  MIN_BASE_COINS_PER_PARTIDA,
   MIN_DECK,
   maxSelectableSlotsForPartida,
   pickRivalDeckBase,
@@ -68,10 +68,10 @@ function createInitialState(): GameState {
     seriesWinsP: 0,
     seriesWinsR: 0,
     gamesInSeries: 0,
-    budgetForPlayer: MIN_BASE_BUDGET_PER_PARTIDA,
-    budgetForRival: MIN_BASE_BUDGET_PER_PARTIDA,
-    playerBudgetStart: MIN_BASE_BUDGET_PER_PARTIDA,
-    rivalBudgetStart: MIN_BASE_BUDGET_PER_PARTIDA,
+    coinsForPlayer: MIN_BASE_COINS_PER_PARTIDA,
+    coinsForRival: MIN_BASE_COINS_PER_PARTIDA,
+    playerCoinsStart: MIN_BASE_COINS_PER_PARTIDA,
+    rivalCoinsStart: MIN_BASE_COINS_PER_PARTIDA,
     spentP: 0,
     spentR: 0,
     playerTrophy: 0,
@@ -79,11 +79,11 @@ function createInitialState(): GameState {
     lastPartidaDeckSlots: [],
     seriesPartidaOutcomes: [],
     combatCardZoom: DEFAULT_COMBAT_ZOOM,
-    combatLogView: 'float',
+    combatLogView: 'min',
     combatLogEntries: [],
     lastCombatEventLogSnapshot: '',
     shopOfferSlots: [],
-    shopRefreshPointsSpent: 0,
+    shopRefreshCoinsSpent: 0,
     shopAsaltoForNextSelect: 1,
     battleUi: createBattleUi(),
   };
@@ -126,9 +126,9 @@ export class GameStateService {
 
   prepareSelectPool(): void {
     this.setGame((g) => {
-      g.playerBudgetStart = g.budgetForPlayer;
-      g.rivalBudgetStart = g.budgetForRival;
-      g.shopRefreshPointsSpent = 0;
+      g.playerCoinsStart = g.coinsForPlayer;
+      g.rivalCoinsStart = g.coinsForRival;
+      g.shopRefreshCoinsSpent = 0;
       if (g.lastPartidaDeckSlots.length) {
         g.deckSlots = persistedSlotsToDeckSlots(g.lastPartidaDeckSlots);
       } else {
@@ -210,17 +210,17 @@ export class GameStateService {
 
   refreshShop(): void {
     const g = this._game();
-    const left = g.playerBudgetStart - g.shopRefreshPointsSpent;
+    const left = g.playerCoinsStart - g.shopRefreshCoinsSpent;
     if (left < SHOP_REFRESH_COST) return;
     this.setGame((s) => {
-      s.shopRefreshPointsSpent += SHOP_REFRESH_COST;
+      s.shopRefreshCoinsSpent += SHOP_REFRESH_COST;
       s.shopOfferSlots = fillShopOffers(this.catalog.cards, s.shopAsaltoForNextSelect);
     });
   }
 
-  selectBudgetLeft(): number {
+  selectShopCoinsLeft(): number {
     const g = this._game();
-    return Math.max(0, g.playerBudgetStart - g.shopRefreshPointsSpent);
+    return Math.max(0, g.playerCoinsStart - g.shopRefreshCoinsSpent);
   }
 
   canStartBattle(): boolean {
@@ -230,7 +230,7 @@ export class GameStateService {
     return (
       n >= MIN_DECK &&
       n <= maxSlots &&
-      g.shopRefreshPointsSpent <= g.playerBudgetStart &&
+      g.shopRefreshCoinsSpent <= g.playerCoinsStart &&
       g.deckSlots.every((s) => s.copies >= 1)
     );
   }
@@ -268,13 +268,13 @@ export class GameStateService {
   startBattle(): void {
     if (!this.canStartBattle()) return;
     this.setGame((g) => {
-      g.playerBudgetStart = Math.max(0, g.playerBudgetStart - g.shopRefreshPointsSpent);
-      g.shopRefreshPointsSpent = 0;
+      g.playerCoinsStart = Math.max(0, g.playerCoinsStart - g.shopRefreshCoinsSpent);
+      g.shopRefreshCoinsSpent = 0;
       g.spentP = 0;
       g.lastPartidaDeckSlots = g.deckSlots.map(({ id, copies }) => ({ id, copies }));
       g.playerDeck = g.deckSlots.map((slot) => this.instantiateFromSlot(slot));
       const usedIds = [...new Set(g.deckSlots.map((s) => s.id))];
-      const rawRival = pickRivalDeckBase(g.rivalBudgetStart, usedIds);
+      const rawRival = pickRivalDeckBase(g.rivalCoinsStart, usedIds);
       g.rivalDeck = rawRival.map((c) => this.instantiate(c));
       g.spentR = rawRival.reduce((s, c) => s + (Number(c.level) || 0), 0);
       g.battleIdx = { p: 0, r: 0 };
@@ -287,6 +287,7 @@ export class GameStateService {
       g.running = true;
       g.combatLogEntries = [];
       g.battleUi = createBattleUi();
+      g.combatLogView = 'min';
       const isEn = this.i18n.isEn();
       g.combatLogEntries.push({
         kind: 'html',
@@ -594,7 +595,7 @@ export class GameStateService {
       g.shopAsaltoForNextSelect = Math.max(1, g.round);
       g.running = false;
       g.endedReason = winner;
-      g.combatLogView = 'float';
+      g.combatLogView = 'min';
     });
     setTimeout(() => this.showResult(winner), 600);
   }
@@ -607,13 +608,13 @@ export class GameStateService {
     if (winner === 'player') seriesWinsP += 1;
     else if (winner === 'rival') seriesWinsR += 1;
 
-    const budgets = applyBudgetAfterGame({
-      playerBudgetStart: snap.playerBudgetStart,
-      rivalBudgetStart: snap.rivalBudgetStart,
+    const coins = applyCoinsAfterGame({
+      playerCoinsStart: snap.playerCoinsStart,
+      rivalCoinsStart: snap.rivalCoinsStart,
       gamesInSeries,
     });
-    const ensured = ensureMinBudget(budgets.budgetForPlayer, budgets.budgetForRival);
-    const grantFib = budgetBonusAfterPartida(gamesInSeries);
+    const ensured = ensureMinCoins(coins.coinsForPlayer, coins.coinsForRival);
+    const grantFib = coinsBonusAfterPartida(gamesInSeries);
 
     const glory = awardGloryAfterPartida({
       winner,
@@ -635,15 +636,15 @@ export class GameStateService {
     if (isDraw) {
       emoji = '🤝';
       title = 'Empate en la partida';
-      subtitle = `Ninguno suma victoria en la serie. Próximo: base + arrastre completo + bono +${grantFib} (total ${ensured.budgetForPlayer} pts tú). Gloria +${glory.gainedP}.`;
+      subtitle = `Ninguno suma victoria en la serie. Próximo: base + arrastre completo + bono +${grantFib} (total ${ensured.coinsForPlayer} 💰 tú). Gloria +${glory.gainedP}.`;
     } else if (isWin) {
       emoji = '🏆';
       title = '¡Ganaste la partida!';
-      subtitle = `Tus cartas dominaron la ronda. +${glory.gainedP} puntos de gloria (acum. ${formatTrophy(newPlayerTrophy)}).`;
+      subtitle = `Tus cartas dominaron la ronda. +${glory.gainedP} gloria (acum. ${formatTrophy(newPlayerTrophy)}).`;
     } else {
       emoji = '💀';
       title = 'Perdiste la partida';
-      subtitle = `El rival se llevó la ronda. +${glory.gainedP} puntos de gloria (acum. ${formatTrophy(newPlayerTrophy)}).`;
+      subtitle = `El rival se llevó la ronda. +${glory.gainedP} gloria (acum. ${formatTrophy(newPlayerTrophy)}).`;
     }
 
     let seriesNote = '';
@@ -654,7 +655,7 @@ export class GameStateService {
         seriesNote = `Serie final: ${seriesWinsP} - ${seriesWinsR}. El rival gana la serie.`;
       }
     } else {
-      seriesNote = `Serie: ${seriesWinsP} - ${seriesWinsR} (primeros a ${WINS_TO_WIN_SERIES} victorias; partida ${gamesInSeries} · BO9+). Próx. presupuesto tú: ${ensured.budgetForPlayer} · rival: ${ensured.budgetForRival}`;
+      seriesNote = `Serie: ${seriesWinsP} - ${seriesWinsR} (primeros a ${WINS_TO_WIN_SERIES} victorias; partida ${gamesInSeries} · BO9+). Próx. 💰 tú: ${ensured.coinsForPlayer} · rival: ${ensured.coinsForRival}`;
     }
 
     const survivorsP = snap.playerDeck.filter((c) => c.alive).length;
@@ -692,8 +693,8 @@ export class GameStateService {
       g.seriesWinsP = seriesWinsP;
       g.seriesWinsR = seriesWinsR;
       g.seriesPartidaOutcomes = [...g.seriesPartidaOutcomes, winner];
-      g.budgetForPlayer = ensured.budgetForPlayer;
-      g.budgetForRival = ensured.budgetForRival;
+      g.coinsForPlayer = ensured.coinsForPlayer;
+      g.coinsForRival = ensured.coinsForRival;
       g.playerTrophy = newPlayerTrophy;
       g.rivalTrophy = newRivalTrophy;
       g.lastCombatEventLogSnapshot = logHtml;

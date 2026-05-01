@@ -67,7 +67,7 @@ export class SelectPageComponent implements OnInit, OnDestroy {
     return `Según el asalto de referencia ${a}, la tienda solo incluye cartas de nivel ${r.min}–${r.max}. ${SHOP_OFFER_COUNT} casillas; la misma carta puede repetirse hasta ${SHOP_MAX_SAME_CARD} veces. Al elegir una, su hueco queda vacío hasta refrescar.`;
   });
 
-  readonly budgetLeft = computed(() => this.gs.selectBudgetLeft());
+  readonly shopCoinsLeft = computed(() => this.gs.selectShopCoinsLeft());
 
   readonly canStart = computed(() => this.gs.canStartBattle());
 

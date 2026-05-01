@@ -7,7 +7,8 @@ import type { BattleWinner, ShopOfferSlot } from '../models/game-state.model';
 import { CARDS } from '../data/cards.catalog';
 
 export const FIBONACCI_COSTS = [1, 2, 3, 5, 8, 13] as const;
-export const MIN_BASE_BUDGET_PER_PARTIDA = 10;
+/** Monedas base que recibe cada bando al inicio de una partida de la serie (antes de arrastre y bono). */
+export const MIN_BASE_COINS_PER_PARTIDA = 10;
 export const MAX_DECK = 10;
 export const MIN_DECK = 1;
 export const WINS_TO_WIN_SERIES = 5;
@@ -66,6 +67,7 @@ export const MAX_DUEL_ASALTOS = 600;
 export const SHOP_OFFER_COUNT = 6;
 /** Máximo de la misma carta (id) en la rejilla de la tienda a la vez. */
 export const SHOP_MAX_SAME_CARD = 3;
+/** Monedas que cuesta refrescar la tienda una vez. */
 export const SHOP_REFRESH_COST = 1;
 
 export const GLORY_PARTICIPATE = 1;
@@ -77,32 +79,32 @@ export const GLORY_SERIES_BONUS = 8;
 export const COMBAT_ZOOM_SCALE: Record<1 | 2 | 3, number> = { 1: 0.75, 2: 1, 3: 2.5 };
 export const DEFAULT_COMBAT_ZOOM = 2 as const;
 
-export function budgetBonusAfterPartida(completedEnSerie: number): number {
+export function coinsBonusAfterPartida(completedEnSerie: number): number {
   const idx = Math.min(Math.max(0, completedEnSerie - 1), FIBONACCI_COSTS.length - 1);
   return FIBONACCI_COSTS[idx];
 }
 
-export function applyBudgetAfterGame(input: {
-  playerBudgetStart: number;
-  rivalBudgetStart: number;
+export function applyCoinsAfterGame(input: {
+  playerCoinsStart: number;
+  rivalCoinsStart: number;
   gamesInSeries: number;
-}): { budgetForPlayer: number; budgetForRival: number } {
-  const carryP = input.playerBudgetStart;
-  const carryR = input.rivalBudgetStart;
-  const bonus = budgetBonusAfterPartida(input.gamesInSeries);
+}): { coinsForPlayer: number; coinsForRival: number } {
+  const carryP = input.playerCoinsStart;
+  const carryR = input.rivalCoinsStart;
+  const bonus = coinsBonusAfterPartida(input.gamesInSeries);
   return {
-    budgetForPlayer: MIN_BASE_BUDGET_PER_PARTIDA + carryP + bonus,
-    budgetForRival: MIN_BASE_BUDGET_PER_PARTIDA + carryR + bonus,
+    coinsForPlayer: MIN_BASE_COINS_PER_PARTIDA + carryP + bonus,
+    coinsForRival: MIN_BASE_COINS_PER_PARTIDA + carryR + bonus,
   };
 }
 
-export function ensureMinBudget(budgetForPlayer: number, budgetForRival: number): {
-  budgetForPlayer: number;
-  budgetForRival: number;
+export function ensureMinCoins(coinsForPlayer: number, coinsForRival: number): {
+  coinsForPlayer: number;
+  coinsForRival: number;
 } {
   return {
-    budgetForPlayer: Math.max(MIN_BASE_BUDGET_PER_PARTIDA, budgetForPlayer),
-    budgetForRival: Math.max(MIN_BASE_BUDGET_PER_PARTIDA, budgetForRival),
+    coinsForPlayer: Math.max(MIN_BASE_COINS_PER_PARTIDA, coinsForPlayer),
+    coinsForRival: Math.max(MIN_BASE_COINS_PER_PARTIDA, coinsForRival),
   };
 }
 
@@ -149,12 +151,12 @@ export function fillShopOffers(
 }
 
 export function pickRivalDeckBase(
-  rivalBudget: number,
+  rivalCoins: number,
   playerSelectedIds: string[],
   catalog: Card[] = CARDS,
   rng: () => number = Math.random,
 ): Card[] {
-  const B = rivalBudget;
+  const B = rivalCoins;
   const used = new Set(playerSelectedIds);
   let pool = catalog.filter((c) => !used.has(c.id));
   if (pool.length === 0) pool = catalog.slice();

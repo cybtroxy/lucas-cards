@@ -94,6 +94,7 @@ const UI: Record<LucasLang, Record<string, string>> = {
     selectDeckFullToast:
       'Quita una carta del mazo para poder añadir otras nuevas.',
     resultCombatDetailToggle: 'Detalle de combate',
+    selectShopCoinsAria: 'Saldo disponible para refrescar la tienda',
   },
   en: {
     typeBadgeTitle: 'Type',
@@ -108,6 +109,7 @@ const UI: Record<LucasLang, Record<string, string>> = {
     refColDesc: 'Description',
     selectDeckFullToast: 'Remove a card from your deck to add new ones.',
     resultCombatDetailToggle: 'Battle details',
+    selectShopCoinsAria: 'Balance available to refresh the shop',
   },
 };
 

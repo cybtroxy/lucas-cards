@@ -333,7 +333,7 @@ app-result-page {
   margin: 0 0 8px;
   color: var(--ink-dim);
 }
-.select-budget {
+.select-coins-panel {
   margin: 10px auto 0;
   padding: 10px 16px;
   max-width: 360px;
@@ -343,9 +343,24 @@ app-result-page {
   font-size: 14px;
   color: var(--ink);
 }
-.select-budget .budget-line { margin: 4px 0; }
-#budget-spent { color: var(--gold); }
-#budget-left { color: #4ade80; }
+.select-coins-panel .coins-line {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.coins-line__icon {
+  font-size: 1.15em;
+  line-height: 1;
+}
+#coins-spent { color: var(--gold); }
+#coins-left { color: #4ade80; }
+
+/* Móvil: chip de saldo (solo visible bajo 900px; ver media query) */
+.select-coins-mob {
+  display: none;
+}
 
 .series-line {
   font-size: 12px;
@@ -1281,14 +1296,58 @@ app-card {
   max-height: min(36vh, 300px);
 }
 .combat-event-panel.is-min {
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: auto;
+  top: auto;
+  transform: none;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  max-width: none;
   max-height: none;
   min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  display: block;
 }
-.combat-event-panel.is-min .combat-event-body {
-  display: none;
+.combat-log-min-chip {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #94a3b8;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.combat-event-panel.is-min {
-  max-width: 280px;
+.combat-log-min-chip:hover {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #cbd5e1;
+}
+.combat-log-min-chip:focus-visible {
+  outline: 2px solid var(--gold, #f5c451);
+  outline-offset: 2px;
+}
+.combat-log-min-chip__ico {
+  display: block;
+  opacity: 0.85;
 }
 .combat-event-panel.is-modal {
   position: fixed;
@@ -1523,6 +1582,16 @@ app-card {
   letter-spacing: .04em;
   transition: background .15s ease, color .15s ease;
 }
+.speed-btn-mob {
+  display: none;
+  font-size: 18px;
+  line-height: 1;
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+}
+.speed-btn-desk {
+  display: inline;
+}
 .speed-btn:hover { color: var(--ink); background: rgba(255,255,255,.06); }
 .speed-btn.active {
   background: linear-gradient(180deg, var(--player), var(--player-strong));
@@ -1678,12 +1747,8 @@ app-card {
 }
 
 /* ===== Responsive ===== */
-/* Tablet y móvil: sin registro de combate; cabecera siempre en una fila */
+/* Tablet y móvil: cabecera de batalla en una fila; sin barra battle-log */
 @media (max-width: 1024px) {
-  #screen-battle .combat-event-panel,
-  #screen-battle .combat-log-backdrop {
-    display: none !important;
-  }
   #screen-battle .battle-log {
     display: none !important;
   }
@@ -1713,13 +1778,141 @@ app-card {
   }
 }
 
-@media (max-width: 760px) {
+/* Viewports bajo 900px: registro de combate oculto; resto “móvil” */
+@media (max-width: 899px) {
+  #screen-battle .combat-event-panel,
+  #screen-battle .combat-log-backdrop {
+    display: none !important;
+  }
+  /* Mismo factor que combat zoom 1 (0.75): cartas y huecos más compactos en móvil */
+  :root {
+    --lucas-select-slot-width: 120px;
+    --lucas-select-card-gap: 12px;
+  }
   .game-title { font-size: 36px; }
+  #screen-select .select-header {
+    display: none !important;
+  }
+  #screen-select .select-coins-mob {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 52px);
+    right: max(10px, env(safe-area-inset-right, 0px) + 8px);
+    z-index: 1001;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink, #eaf0ff);
+    pointer-events: none;
+  }
+  .select-coins-mob__icon {
+    font-size: 1.1em;
+    line-height: 1;
+  }
+  .select-coins-mob__value {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #4ade80;
+    line-height: 1;
+  }
   #screen-select .hint,
   #screen-select .section-hint {
     display: none;
   }
+  /* Mis cartas: wrap en varias filas; sin scroll horizontal */
+  #screen-select .my-deck-row.my-cards-deck {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    overflow-y: visible;
+    justify-content: center;
+    row-gap: var(--lucas-select-card-gap);
+    padding: 16px 12px;
+  }
+  /* Tienda: mismas celdas que el grid, filas centradas como el mazo */
+  #screen-select .card-pool {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: var(--lucas-select-card-gap);
+  }
+  #screen-select .card-pool > app-card,
+  #screen-select .card-pool > .shop-offer-placeholder {
+    flex: 0 0 var(--lucas-select-slot-width);
+    width: var(--lucas-select-slot-width);
+    min-width: var(--lucas-select-slot-width);
+    max-width: var(--lucas-select-slot-width);
+    box-sizing: border-box;
+  }
   #screen-battle .arena { padding: 0; gap: 4px; }
+  /* Cabecera: mitad izq. / mitad dcha.; asalto en capa superior centrado */
+  #screen-battle .battle-topbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(50px, auto);
+    gap: 0;
+    padding: 8px max(4px, env(safe-area-inset-left)) 10px max(4px, env(safe-area-inset-right));
+    align-items: stretch;
+  }
+  #screen-battle .player-badge.left {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    z-index: 1;
+    gap: 6px;
+    padding: 6px 8px 6px 10px;
+    border-radius: 999px 10px 10px 999px;
+    justify-content: flex-start;
+  }
+  #screen-battle .player-badge.right {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    z-index: 1;
+    gap: 6px;
+    padding: 6px 10px 6px 8px;
+    border-radius: 10px 999px 999px 10px;
+    justify-content: flex-end;
+  }
+  #screen-battle .player-badge .info {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  #screen-battle .player-badge .info .name {
+    max-width: 100%;
+  }
+  #screen-battle .round-pill {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    z-index: 4;
+    margin: 0;
+    width: max-content;
+    max-width: min(88vw, 240px);
+    padding: 5px 14px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(26, 37, 71, 0.96), rgba(13, 21, 48, 0.96));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  }
   /* Solo móvil: sin padding horizontal en jugador; rival sin cambio explícito aquí */
   #screen-battle .player-side {
     padding-top: 26px;
@@ -1733,47 +1926,128 @@ app-card {
     padding-bottom: 34px;
     padding-left: 0;
   }
+  /* Ancho base × 0.75 respecto al móvil anterior (equivalente visual a zoom 1 sobre 180px) */
   #screen-battle .side app-card {
-    min-width: min(160px, 42vw);
-    max-width: min(200px, 90vw);
-    width: min(180px, 48vw);
+    min-width: min(120px, 31.5vw);
+    max-width: min(150px, 67.5vw);
+    width: min(135px, 36vw);
   }
   .vs-badge {
     font-size: 26px;
     padding-left: 0;
     padding-right: 0;
   }
-  .round-pill { padding: 6px 10px; }
   .round-pill .series-line,
   .round-pill .ronda-progress {
     display: none;
   }
-  .round-pill .ronda-label {
+  #screen-battle .round-pill .ronda-label {
     font-size: 11px;
     letter-spacing: 0.1em;
+    white-space: nowrap;
   }
-  .player-badge {
-    gap: 8px;
-    padding: 6px 10px;
-  }
-  .player-badge .avatar {
+  #screen-battle .player-badge .avatar {
     width: 36px;
     height: 36px;
     font-size: 20px;
+    flex-shrink: 0;
   }
-  .player-badge .info .name {
+  #screen-battle .player-badge .info .name {
     font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 28vw;
   }
-  .player-badge .info .trophy {
+  #screen-battle .player-badge .info .trophy {
     font-size: 11px;
   }
   .battle-controls { grid-template-columns: 1fr; gap: 8px; }
   .battle-controls-center { width: 100%; flex-direction: column; }
   .speed-controls { justify-content: center; }
-  .combat-zoom-controls { flex-wrap: wrap; justify-content: center; }
+  .speed-controls .speed-btn[data-speed="2"],
+  .speed-controls .speed-btn[data-speed="auto"] {
+    display: none;
+  }
+  .speed-btn[data-speed="1"] .speed-btn-mob,
+  .speed-btn[data-speed="3"] .speed-btn-mob {
+    display: inline;
+  }
+  .speed-btn[data-speed="1"] .speed-btn-desk,
+  .speed-btn[data-speed="3"] .speed-btn-desk {
+    display: none;
+  }
+  .speed-btn[data-speed="1"],
+  .speed-btn[data-speed="3"] {
+    padding: 8px 12px;
+    min-width: 44px;
+  }
+  .combat-zoom-controls {
+    display: none !important;
+  }
   .end-turn { display: none; }
+
+  /* Pantalla resultado (ganar/perder): ~70% del tamaño base */
+  #screen-result.screen {
+    padding: 17px 11px 22px;
+  }
+  #screen-result .result-wrap {
+    max-width: 420px;
+    padding: 22px;
+    border-radius: 14px;
+  }
+  #screen-result .result-emoji {
+    font-size: 59px;
+    margin-bottom: 8px;
+  }
+  #screen-result .result-wrap h2 {
+    font-size: 29px;
+    margin: 0 0 6px;
+  }
+  #screen-result .result-wrap p {
+    margin: 0 0 14px;
+    font-size: 0.93em;
+  }
+  #screen-result .result-detail-toggle-wrap {
+    margin: 8px 0 11px;
+  }
+  #screen-result .result-detail-toggle {
+    font-size: 0.93em;
+  }
+  #screen-result .result-stats {
+    gap: 14px;
+    margin: 14px 0;
+  }
+  #screen-result .result-stat {
+    padding: 7px 13px;
+    min-width: 77px;
+    border-radius: 8px;
+  }
+  #screen-result .result-stat .label {
+    font-size: 8px;
+  }
+  #screen-result .result-stat .value {
+    font-size: 15px;
+  }
+  #screen-result .result-combat-log-wrap {
+    margin: 6px 0 14px;
+  }
+  #screen-result .result-combat-log-wrap .btn-secondary {
+    max-width: 224px;
+    font-size: 0.9em;
+    padding: 8px 14px;
+  }
+  #screen-result .menu-actions.result-actions {
+    gap: 8px;
+  }
+  #screen-result .menu-actions.result-actions .btn-primary,
+  #screen-result .menu-actions.result-actions .btn-secondary {
+    font-size: 0.88em;
+    padding: 10px 14px;
+  }
+  #screen-result .result-combat-log-dialog {
+    width: min(65.8vw, 448px);
+  }
+  #screen-result .result-combat-log-dialog-inner {
+    max-height: min(59.5vh, 504px);
+  }
 }

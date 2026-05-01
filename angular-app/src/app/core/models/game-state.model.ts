@@ -36,10 +36,10 @@ export interface GameState {
   seriesWinsR: number;
   gamesInSeries: number;
 
-  budgetForPlayer: number;
-  budgetForRival: number;
-  playerBudgetStart: number;
-  rivalBudgetStart: number;
+  coinsForPlayer: number;
+  coinsForRival: number;
+  playerCoinsStart: number;
+  rivalCoinsStart: number;
   spentP: number;
   spentR: number;
 
@@ -59,7 +59,7 @@ export interface GameState {
 
   /** Casillas fijas de la tienda (longitud constante); `card: null` = hueco ya elegido o sin rellenar. */
   shopOfferSlots: ShopOfferSlot[];
-  shopRefreshPointsSpent: number;
+  shopRefreshCoinsSpent: number;
   shopAsaltoForNextSelect: number;
 
   /** UI de batalla: fase de animación del asalto actual. */

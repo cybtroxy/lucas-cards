@@ -1,17 +1,30 @@
-<section id="screen-select" class="screen active">
+<section id="screen-select" class="screen active" aria-label="Elige tu mazo">
   <div class="bg-landscape"></div>
+  <div
+    class="select-coins-mob"
+    role="status"
+    aria-live="polite"
+    [attr.aria-label]="i18n.tUi('selectShopCoinsAria')"
+  >
+    <span class="select-coins-mob__icon" aria-hidden="true">💰</span>
+    <span class="select-coins-mob__value">{{ shopCoinsLeft() }}</span>
+  </div>
   <header class="select-header">
     <h2>Elige tu mazo</h2>
     <p class="hint">
       Partida <strong>{{ upcomingPartida() }}</strong> de la serie: puedes llenar hasta
       <strong>{{ maxSlots() }} huecos</strong> (cada hueco puede acumular la misma carta para bonificar PV/ATK).
-      Solo cartas de la <strong>tienda</strong>. Los puntos sirven para <strong>refrescar</strong>.
+      Solo cartas de la <strong>tienda</strong>. <span aria-hidden="true">💰</span> sirve para <strong>refrescar</strong>.
     </p>
-    <div class="select-budget" id="select-budget">
-      <div class="budget-line">Puntos: <span id="budget-total">{{ game().playerBudgetStart }}</span></div>
-      <div class="budget-line">
-        Gastado en refrescos: <span id="budget-spent">{{ game().shopRefreshPointsSpent }}</span> · Restante:
-        <span id="budget-left">{{ budgetLeft() }}</span>
+    <div class="select-coins-panel" id="select-coins-panel">
+      <div class="coins-line">
+        <span class="coins-line__icon" aria-hidden="true">💰</span>
+        <span id="coins-total">{{ game().playerCoinsStart }}</span>
+      </div>
+      <div class="coins-line">
+        Gastado en refrescos: <span id="coins-spent">{{ game().shopRefreshCoinsSpent }}</span>
+        <span aria-hidden="true"> · </span>
+        Restante: <span id="coins-left">{{ shopCoinsLeft() }}</span>
       </div>
     </div>
   </header>
@@ -61,10 +74,10 @@
           type="button"
           class="btn-secondary"
           id="btn-shop-refresh"
-          [disabled]="budgetLeft() < 1"
+          [disabled]="shopCoinsLeft() < 1"
           (click)="refreshShop()"
         >
-          Refrescar tienda (−1 pt)
+          Refrescar tienda <span aria-hidden="true">(−💰1)</span>
         </button>
       </div>
       <div id="card-pool" class="card-pool">
