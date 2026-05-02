@@ -1,30 +1,14 @@
 import { Injectable, signal } from '@angular/core';
+import { preferMp3Assets, setPreferMp3Assets, soundAssetUrl } from './sound-assets.config';
 
 const STORAGE_KEY = 'lucasCardsSoundEnabled';
 
-/** Generado con `scripts/generate_denial_wav.py` → `public/sounds/shopping/denial.wav`. */
-export const SOUND_DENIAL_URL = '/sounds/shopping/denial.wav';
+/** Por defecto MP3 (`sound-assets.config`); `setPreferMp3Assets(false)` fuerza WAV. */
+export { preferMp3Assets, setPreferMp3Assets };
 
-/** Generado con `scripts/generate_shop_pick_wav.py` → `public/sounds/shopping/shop-pick.wav`. */
-export const SOUND_SHOP_PICK_URL = '/sounds/shopping/shop-pick.wav';
-
-const SOUND_BATTLE = {
-  hitEnemy: '/sounds/battle/hit-enemy.wav',
-  hitPlayer: '/sounds/battle/hit-player.wav',
-  heal: '/sounds/battle/heal.wav',
-  deathSingle: '/sounds/battle/death-single.wav',
-  deathDouble: '/sounds/battle/death-double.wav',
-  roundWin: '/sounds/battle/round-win.wav',
-  roundLose: '/sounds/battle/round-lose.wav',
-  matchWin: '/sounds/battle/match-win.wav',
-  matchLose: '/sounds/battle/match-lose.wav',
-} as const;
-
-/** Cues de audio del juego; añade claves y manejadores en `SoundService.play`. */
+/** Cues de audio del juego; buffers precargados tras unlock. */
 export const SoundCue = {
-  /** Intento inválido (p. ej. no se puede añadir carta desde la tienda). */
   Denial: 'denial',
-  /** Carta añadida al mazo desde la tienda. */
   ShopPick: 'shopPick',
   BattleHitEnemy: 'battleHitEnemy',
   BattleHitPlayer: 'battleHitPlayer',
@@ -39,15 +23,70 @@ export const SoundCue = {
 
 export type SoundCue = (typeof SoundCue)[keyof typeof SoundCue];
 
+/** Rutas bajo `public/sounds/` sin extensión (ver `soundAssetUrl`). */
+const CUE_PATHS: Record<SoundCue, string> = {
+  [SoundCue.Denial]: 'shopping/denial',
+  [SoundCue.ShopPick]: 'shopping/shop-pick',
+  [SoundCue.BattleHitEnemy]: 'battle/hit-enemy',
+  [SoundCue.BattleHitPlayer]: 'battle/hit-player',
+  [SoundCue.BattleHeal]: 'battle/heal',
+  [SoundCue.BattleDeathSingle]: 'battle/death-single',
+  [SoundCue.BattleDeathDouble]: 'battle/death-double',
+  [SoundCue.BattleRoundWin]: 'battle/round-win',
+  [SoundCue.BattleRoundLose]: 'battle/round-lose',
+  [SoundCue.BattleMatchWin]: 'battle/match-win',
+  [SoundCue.BattleMatchLose]: 'battle/match-lose',
+};
+
+const CUE_VOLUME: Record<SoundCue, number> = {
+  [SoundCue.Denial]: 0.42,
+  [SoundCue.ShopPick]: 0.38,
+  [SoundCue.BattleHitEnemy]: 0.62,
+  [SoundCue.BattleHitPlayer]: 0.62,
+  [SoundCue.BattleHeal]: 0.55,
+  [SoundCue.BattleDeathSingle]: 0.65,
+  [SoundCue.BattleDeathDouble]: 0.65,
+  [SoundCue.BattleRoundWin]: 0.58,
+  [SoundCue.BattleRoundLose]: 0.58,
+  [SoundCue.BattleMatchWin]: 0.62,
+  [SoundCue.BattleMatchLose]: 0.62,
+};
+
+/** URLs actuales según `preferMp3Assets` (evaluar tras posible `setPreferMp3Assets`). */
+export function soundCueDenialUrl(): string {
+  return soundAssetUrl('shopping/denial');
+}
+export function soundCueShopPickUrl(): string {
+  return soundAssetUrl('shopping/shop-pick');
+}
+
+/** @deprecated Usar `soundCueDenialUrl()` si cambias MP3 en runtime. */
+export const SOUND_DENIAL_URL = soundAssetUrl('shopping/denial');
+/** @deprecated Usar `soundCueShopPickUrl()`. */
+export const SOUND_SHOP_PICK_URL = soundAssetUrl('shopping/shop-pick');
+
 /**
- * Sistema central de sonido: archivos en `public/sounds/` y respaldo por síntesis Web Audio.
+ * Audio por Web Audio API: unlock en primer gesto, caché de `AudioBuffer`, fallback HTMLAudioElement.
+ * Por defecto MP3 en `sound-assets.config`; fallback HTMLAudio si decode falla.
  */
 @Injectable({ providedIn: 'root' })
 export class SoundService {
   private audioContext: AudioContext | null = null;
+  private readonly bufferCache = new Map<string, AudioBuffer>();
+  private readonly bufferLoads = new Map<string, Promise<AudioBuffer | null>>();
+  private unlockSetup = false;
+  private unlockRunning = false;
 
-  /** Si es false, `play` no reproduce nada. */
+  /** Desbloqueado tras primer pointer/touch/click (AudioContext running). */
+  readonly audioUnlocked = signal(false);
+  /** Todos los cues intentaron cargarse en buffer (algunos pueden fallar silenciosamente). */
+  readonly buffersWarm = signal(false);
+
   readonly enabled = signal(this.readStoredEnabled());
+
+  private readonly onFirstInteraction = (): void => {
+    void this.performUnlock();
+  };
 
   setEnabled(on: boolean): void {
     try {
@@ -58,57 +97,211 @@ export class SoundService {
     this.enabled.set(on);
   }
 
-  play(cue: SoundCue): void {
-    if (!this.enabled()) return;
-    switch (cue) {
-      case SoundCue.Denial:
-        void this.playDenial();
-        break;
-      case SoundCue.ShopPick:
-        void this.playShopPick();
-        break;
-      case SoundCue.BattleHitEnemy:
-        this.playUrl(SOUND_BATTLE.hitEnemy, 0.62);
-        break;
-      case SoundCue.BattleHitPlayer:
-        this.playUrl(SOUND_BATTLE.hitPlayer, 0.62);
-        break;
-      case SoundCue.BattleHeal:
-        this.playUrl(SOUND_BATTLE.heal, 0.55);
-        break;
-      case SoundCue.BattleDeathSingle:
-        this.playUrl(SOUND_BATTLE.deathSingle, 0.65);
-        break;
-      case SoundCue.BattleDeathDouble:
-        this.playUrl(SOUND_BATTLE.deathDouble, 0.65);
-        break;
-      case SoundCue.BattleRoundWin:
-        this.playUrl(SOUND_BATTLE.roundWin, 0.58);
-        break;
-      case SoundCue.BattleRoundLose:
-        this.playUrl(SOUND_BATTLE.roundLose, 0.58);
-        break;
-      case SoundCue.BattleMatchWin:
-        this.playUrl(SOUND_BATTLE.matchWin, 0.62);
-        break;
-      case SoundCue.BattleMatchLose:
-        this.playUrl(SOUND_BATTLE.matchLose, 0.62);
-        break;
-      default:
-        break;
-    }
+  /**
+   * Registrar una vez: primer gesto del usuario desbloquea audio iOS/Safari y precarga buffers.
+   * Llamar desde `AppComponent` al iniciar la app.
+   */
+  setupDocumentUnlock(): void {
+    if (typeof document === 'undefined') return;
+    if (this.unlockSetup) return;
+    this.unlockSetup = true;
+    document.addEventListener('pointerdown', this.onFirstInteraction, { passive: true });
+    document.addEventListener('touchstart', this.onFirstInteraction, { passive: true });
+    document.addEventListener('click', this.onFirstInteraction, { passive: true });
   }
 
   /**
-   * Reproduce un archivo servido desde `public/` (p. ej. `sounds/foo.mp3` → `/sounds/foo.mp3`).
+   * Tras generar `.mp3` y cambiar formato: actualiza flag y vacía buffers decodificados.
+   * Llamar antes del siguiente combate si cambias MP3/WAV en caliente.
+   */
+  applyPreferMp3Assets(on: boolean): void {
+    setPreferMp3Assets(on);
+    this.bufferCache.clear();
+    this.bufferLoads.clear();
+    this.buffersWarm.set(false);
+    if (this.audioUnlocked()) {
+      void this.preloadAllCueBuffers().finally(() => this.buffersWarm.set(true));
+    }
+  }
+
+  play(cue: SoundCue): void {
+    if (!this.enabled()) return;
+    const path = CUE_PATHS[cue];
+    const url = soundAssetUrl(path);
+    const volume = CUE_VOLUME[cue];
+    void this.playCue(cue, url, volume);
+  }
+
+  /**
+   * URL directa (p. ej. tests); usa buffer si está en caché y desbloqueado.
    */
   playUrl(url: string, volume = 0.7): void {
     if (!this.enabled()) return;
+    void this.playUrlInternal(url, volume);
+  }
+
+  private async performUnlock(): Promise<void> {
+    if (this.audioUnlocked() || this.unlockRunning) return;
+    this.unlockRunning = true;
+    try {
+      const ctx = this.getAudioContext();
+      await ctx.resume().catch(() => undefined);
+
+      try {
+        const ping = ctx.createBuffer(1, 1, ctx.sampleRate);
+        const src = ctx.createBufferSource();
+        src.buffer = ping;
+        const g = ctx.createGain();
+        g.gain.value = 0.0001;
+        src.connect(g);
+        g.connect(ctx.destination);
+        src.start(0);
+      } catch {
+        /* ignore */
+      }
+
+      await ctx.resume().catch(() => undefined);
+      this.detachUnlockListeners();
+      this.audioUnlocked.set(ctx.state === 'running');
+
+      void this.preloadAllCueBuffers().finally(() => this.buffersWarm.set(true));
+    } finally {
+      this.unlockRunning = false;
+    }
+  }
+
+  private detachUnlockListeners(): void {
+    if (typeof document === 'undefined') return;
+    document.removeEventListener('pointerdown', this.onFirstInteraction);
+    document.removeEventListener('touchstart', this.onFirstInteraction);
+    document.removeEventListener('click', this.onFirstInteraction);
+  }
+
+  private getAudioContext(): AudioContext {
+    if (!this.audioContext) {
+      const AC =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AC) {
+        throw new Error('AudioContext not supported');
+      }
+      this.audioContext = new AC();
+    }
+    return this.audioContext;
+  }
+
+  private async preloadAllCueBuffers(): Promise<void> {
+    const ctx = this.getAudioContext();
+    await this.resumeIfNeeded(ctx);
+    const urls = [...new Set(Object.values(CUE_PATHS).map((p) => soundAssetUrl(p)))];
+    await Promise.all(urls.map((u) => this.ensureBuffer(ctx, u)));
+  }
+
+  private async resumeIfNeeded(ctx: AudioContext): Promise<void> {
+    if (ctx.state === 'suspended') {
+      await ctx.resume().catch(() => undefined);
+    }
+  }
+
+  private decodeArrayBuffer(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBuffer> {
+    const copy = data.slice(0);
+    const maybePromise = ctx.decodeAudioData(copy);
+    if (maybePromise instanceof Promise) {
+      return maybePromise;
+    }
+    return new Promise((resolve, reject) => {
+      ctx.decodeAudioData(data.slice(0), resolve, reject);
+    });
+  }
+
+  private async ensureBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer | null> {
+    const hit = this.bufferCache.get(url);
+    if (hit) return hit;
+
+    const pending = this.bufferLoads.get(url);
+    if (pending) return pending;
+
+    const load = (async (): Promise<AudioBuffer | null> => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const ab = await res.arrayBuffer();
+        await this.resumeIfNeeded(ctx);
+        const audioBuf = await this.decodeArrayBuffer(ctx, ab);
+        this.bufferCache.set(url, audioBuf);
+        return audioBuf;
+      } catch {
+        return null;
+      } finally {
+        this.bufferLoads.delete(url);
+      }
+    })();
+
+    this.bufferLoads.set(url, load);
+    return load;
+  }
+
+  private async playCue(cue: SoundCue, url: string, volume: number): Promise<void> {
+    const ctx = this.getAudioContext();
+    await this.resumeIfNeeded(ctx);
+
+    const buf = await this.ensureBuffer(ctx, url);
+    await this.resumeIfNeeded(ctx);
+    if (buf) {
+      try {
+        this.playBuffer(ctx, buf, volume);
+        return;
+      } catch {
+        /* fallback */
+      }
+    }
+
+    if (cue === SoundCue.Denial) {
+      await this.playDenialFallback();
+      return;
+    }
+    if (cue === SoundCue.ShopPick) {
+      await this.playShopPickFallback();
+      return;
+    }
+
+    await this.playHtmlAudio(url, volume);
+  }
+
+  private async playUrlInternal(url: string, volume: number): Promise<void> {
+    const ctx = this.getAudioContext();
+    await this.resumeIfNeeded(ctx);
+    const buf = await this.ensureBuffer(ctx, url);
+    await this.resumeIfNeeded(ctx);
+    if (buf) {
+      try {
+        this.playBuffer(ctx, buf, volume);
+        return;
+      } catch {
+        /* */
+      }
+    }
+    await this.playHtmlAudio(url, volume);
+  }
+
+  private playBuffer(ctx: AudioContext, buffer: AudioBuffer, volume: number): void {
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = Math.max(0, Math.min(1, volume));
+    src.buffer = buffer;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(0);
+  }
+
+  private async playHtmlAudio(url: string, volume: number): Promise<void> {
     const audio = new Audio(url);
     audio.volume = Math.max(0, Math.min(1, volume));
-    void audio.play().catch(() => {
-      /* autoplay bloqueado o recurso ausente */
-    });
+    try {
+      await audio.play();
+    } catch {
+      /* autoplay / iOS */
+    }
   }
 
   private readStoredEnabled(): boolean {
@@ -122,42 +315,16 @@ export class SoundService {
     return true;
   }
 
-  private getContext(): AudioContext {
-    if (!this.audioContext) {
-      this.audioContext = new AudioContext();
-    }
-    return this.audioContext;
+  private async playDenialFallback(): Promise<void> {
+    await this.playDenialSynthetic();
   }
 
-  private async resumeIfNeeded(ctx: AudioContext): Promise<void> {
-    if (ctx.state === 'suspended') {
-      await ctx.resume().catch(() => undefined);
-    }
+  private async playShopPickFallback(): Promise<void> {
+    await this.playShopPickSynthetic();
   }
 
-  private async playDenial(): Promise<void> {
-    const audio = new Audio(SOUND_DENIAL_URL);
-    audio.volume = 0.42;
-    try {
-      await audio.play();
-    } catch {
-      await this.playDenialSynthetic();
-    }
-  }
-
-  private async playShopPick(): Promise<void> {
-    const audio = new Audio(SOUND_SHOP_PICK_URL);
-    audio.volume = 0.38;
-    try {
-      await audio.play();
-    } catch {
-      await this.playShopPickSynthetic();
-    }
-  }
-
-  /** Respaldo si el WAV no carga o el navegador bloquea `HTMLAudioElement.play`. */
   private async playDenialSynthetic(): Promise<void> {
-    const ctx = this.getContext();
+    const ctx = this.getAudioContext();
     await this.resumeIfNeeded(ctx);
     const t0 = ctx.currentTime;
     const dur = 0.14;
@@ -179,9 +346,8 @@ export class SoundService {
     osc.stop(t0 + dur + 0.03);
   }
 
-  /** Dos tonos ascendentes (aprox. C5 → E5), similar al WAV generado. */
   private async playShopPickSynthetic(): Promise<void> {
-    const ctx = this.getContext();
+    const ctx = this.getAudioContext();
     await this.resumeIfNeeded(ctx);
     const playTone = (start: number, freq: number, len: number, peak: number): void => {
       const osc = ctx.createOscillator();
