@@ -1,0 +1,48 @@
+<div
+  class="audio-fab-wrap"
+  [class.audio-fab-wrap--select-tools]="layout() === 'selectTools'"
+  [class.audio-fab-wrap--battle-dock]="layout() === 'battleDock'"
+>
+  @if (panelOpen()) {
+    <div class="audio-fab-backdrop" (click)="closePanel()" aria-hidden="true"></div>
+  }
+  <div class="audio-fab-panel" [class.audio-fab-panel--open]="panelOpen()" role="dialog" [attr.aria-label]="i18n.tUi('audioSettingsTitle')">
+    <div class="audio-fab-panel__head">
+      <span class="audio-fab-panel__title">{{ i18n.tUi('audioSettingsTitle') }}</span>
+      <button type="button" class="audio-fab-panel__close" [attr.aria-label]="i18n.tUi('audioSettingsClose')" (click)="closePanel()">
+        ×
+      </button>
+    </div>
+    <label class="audio-fab-row">
+      <span class="audio-fab-row__label">{{ i18n.tUi('audioSettingsMute') }}</span>
+      <input
+        type="checkbox"
+        class="audio-fab-toggle"
+        [checked]="sound.enabled()"
+        (click)="$event.preventDefault(); toggleSoundEnabled()"
+      />
+    </label>
+    <label class="audio-fab-row audio-fab-row--slider">
+      <span class="audio-fab-row__label">{{ i18n.tUi('audioSettingsVolume') }} ({{ volumePercent() }}%)</span>
+      <input
+        type="range"
+        class="audio-fab-range"
+        min="0"
+        max="100"
+        step="1"
+        [value]="volumePercent()"
+        (input)="onVolumeInput($event)"
+      />
+    </label>
+  </div>
+  <button
+    type="button"
+    class="audio-fab-trigger"
+    [class.audio-fab-trigger--active]="panelOpen()"
+    [attr.aria-expanded]="panelOpen()"
+    [attr.aria-label]="i18n.tUi('audioSettingsOpen')"
+    (click)="togglePanel()"
+  >
+    <span class="audio-fab-trigger__icon" aria-hidden="true">⚙</span>
+  </button>
+</div>

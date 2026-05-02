@@ -15,6 +15,7 @@ import { newDeckSlotUid, persistedSlotsToDeckSlots } from '../models/deck-slot.m
 import { CardsCatalogService } from './cards-catalog.service';
 import { I18nService } from './i18n.service';
 import { SoundCue, SoundService } from './sound.service';
+import { UserPreferencesService } from './user-preferences.service';
 import type { StrikeParticipant } from '../engine/combat.engine';
 import { applySimultaneousExchange, sumAttackerHealFromStrikeDetail } from '../engine/combat.engine';
 import {
@@ -98,6 +99,7 @@ export class GameStateService {
   private readonly catalog = inject(CardsCatalogService);
   private readonly i18n = inject(I18nService);
   private readonly sound = inject(SoundService);
+  private readonly userPrefs = inject(UserPreferencesService);
 
   /** Estado único del juego (signal + observable equivalente a BehaviorSubject). */
   private readonly _game = signal<GameState>(createInitialState());
@@ -291,12 +293,21 @@ export class GameStateService {
       g.endedReason = null;
       g.log = [];
       g.paused = false;
-      g.speed = 1;
-      g.auto = false;
       g.running = true;
       g.combatLogEntries = [];
       g.battleUi = createBattleUi();
       g.combatLogView = 'min';
+      const bui = this.userPrefs.battleUi();
+      g.combatCardZoom = bui.combatZoom;
+      if (bui.battleAuto) {
+        g.auto = true;
+        g.speed = 3;
+        g.paused = false;
+      } else {
+        g.auto = false;
+        g.speed = bui.battleSpeed;
+        g.paused = false;
+      }
       const isEn = this.i18n.isEn();
       g.combatLogEntries.push({
         kind: 'html',
@@ -311,12 +322,15 @@ export class GameStateService {
   }
 
   /** x1 / x2 / x3: desactiva AUTO (comportamiento vanilla). */
-  setSpeed(s: number): void {
+  setSpeed(s: number, persist: boolean = true): void {
     this.setGame((g) => {
       if (s !== 0) g.auto = false;
       g.speed = s;
       g.paused = s === 0;
     });
+    if (persist && s >= 1 && s <= 3) {
+      this.userPrefs.patchBattleUi({ battleSpeed: s as 1 | 2 | 3, battleAuto: false });
+    }
   }
 
   togglePause(): void {
@@ -344,12 +358,20 @@ export class GameStateService {
         g.speed = 1;
       }
     });
+    const g = this._game();
+    this.userPrefs.patchBattleUi({
+      battleAuto: g.auto,
+      battleSpeed: g.auto ? 3 : (g.speed as 1 | 2 | 3),
+    });
   }
 
-  setCombatZoom(level: 1 | 2 | 3): void {
+  setCombatZoom(level: 1 | 2 | 3, persist: boolean = true): void {
     this.setGame((g) => {
       g.combatCardZoom = level;
     });
+    if (persist) {
+      this.userPrefs.patchBattleUi({ combatZoom: level });
+    }
   }
 
   setCombatLogView(mode: CombatLogViewMode): void {
@@ -364,6 +386,7 @@ export class GameStateService {
       g.paused = false;
       g.speed = 3;
     });
+    this.userPrefs.patchBattleUi({ battleAuto: true, battleSpeed: 3 });
   }
 
   private speedToMs(base: number): number {

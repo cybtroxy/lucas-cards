@@ -100,64 +100,67 @@
     [attr.aria-hidden]="game().combatLogView !== 'modal'"
     (click)="onBackdropClick()"
   ></div>
-  <div
-    id="combat-event-panel"
-    class="combat-event-panel"
-    [class.is-float]="game().combatLogView === 'float'"
-    [class.is-min]="game().combatLogView === 'min'"
-    [class.is-modal]="game().combatLogView === 'modal'"
-    [attr.data-ce-mode]="game().combatLogView"
-    role="region"
-    [attr.aria-label]="combatEventTitle()"
-  >
-    @if (game().combatLogView === 'min') {
-      <button
-        type="button"
-        class="combat-log-min-chip"
-        id="btn-combat-log-expand"
-        (click)="setCombatLogMode('float')"
-        [attr.title]="combatEventTitle()"
-        [attr.aria-label]="combatEventTitle()"
-      >
-        <span class="combat-log-min-chip__ico" aria-hidden="true">📋</span>
-      </button>
-    } @else {
-      <div class="combat-event-header">
-        <span class="combat-event-title" id="combat-event-title">{{ combatEventTitle() }}</span>
-        <div class="combat-event-btns">
-          <button
-            type="button"
-            class="ce-mode-btn"
-            title="Minimizar"
-            [attr.aria-pressed]="game().combatLogView === 'min'"
-            (click)="setCombatLogMode('min')"
-          >
-            ─
-          </button>
-          <button
-            type="button"
-            class="ce-mode-btn"
-            title="Ventana flotante"
-            [attr.aria-pressed]="game().combatLogView === 'float'"
-            (click)="setCombatLogMode('float')"
-          >
-            ▢
-          </button>
-          <button
-            type="button"
-            class="ce-mode-btn"
-            title="Pantalla completa"
-            [attr.aria-pressed]="game().combatLogView === 'modal'"
-            (click)="setCombatLogMode('modal')"
-          >
-            ⛶
-          </button>
+  <div class="battle-side-dock">
+    <div
+      id="combat-event-panel"
+      class="combat-event-panel"
+      [class.is-float]="game().combatLogView === 'float'"
+      [class.is-min]="game().combatLogView === 'min'"
+      [class.is-modal]="game().combatLogView === 'modal'"
+      [attr.data-ce-mode]="game().combatLogView"
+      role="region"
+      [attr.aria-label]="combatEventTitle()"
+    >
+      @if (game().combatLogView === 'min') {
+        <button
+          type="button"
+          class="combat-log-min-chip"
+          id="btn-combat-log-expand"
+          (click)="setCombatLogMode('float')"
+          [attr.title]="combatEventTitle()"
+          [attr.aria-label]="combatEventTitle()"
+        >
+          <span class="combat-log-min-chip__ico" aria-hidden="true">📋</span>
+        </button>
+      } @else {
+        <div class="combat-event-header">
+          <span class="combat-event-title" id="combat-event-title">{{ combatEventTitle() }}</span>
+          <div class="combat-event-btns">
+            <button
+              type="button"
+              class="ce-mode-btn"
+              title="Minimizar"
+              [attr.aria-pressed]="game().combatLogView === 'min'"
+              (click)="setCombatLogMode('min')"
+            >
+              ─
+            </button>
+            <button
+              type="button"
+              class="ce-mode-btn"
+              title="Ventana flotante"
+              [attr.aria-pressed]="game().combatLogView === 'float'"
+              (click)="setCombatLogMode('float')"
+            >
+              ▢
+            </button>
+            <button
+              type="button"
+              class="ce-mode-btn"
+              title="Pantalla completa"
+              [attr.aria-pressed]="game().combatLogView === 'modal'"
+              (click)="setCombatLogMode('modal')"
+            >
+              ⛶
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="combat-event-body">
-        <div id="combat-event-log" class="combat-event-log" tabindex="0" [innerHTML]="combatLogSafe()"></div>
-      </div>
-    }
+        <div class="combat-event-body">
+          <div id="combat-event-log" class="combat-event-log" tabindex="0" [innerHTML]="combatLogSafe()"></div>
+        </div>
+      }
+    </div>
+    <app-audio-settings-fab layout="battleDock" />
   </div>
 
   <div class="battle-log" id="battle-log">

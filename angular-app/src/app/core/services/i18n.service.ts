@@ -62,6 +62,11 @@ const UI: Record<LucasLang, Record<string, string>> = {
     rivalDifficultyEasy: 'Fácil',
     rivalDifficultyNormal: 'Normal',
     rivalDifficultyHard: 'Difícil',
+    audioSettingsTitle: 'Audio',
+    audioSettingsMute: 'Sonido',
+    audioSettingsVolume: 'Volumen',
+    audioSettingsOpen: 'Ajustes de audio',
+    audioSettingsClose: 'Cerrar panel de audio',
   },
   en: {
     typeBadgeTitle: 'Type',
@@ -77,6 +82,11 @@ const UI: Record<LucasLang, Record<string, string>> = {
     rivalDifficultyEasy: 'Easy',
     rivalDifficultyNormal: 'Normal',
     rivalDifficultyHard: 'Hard',
+    audioSettingsTitle: 'Audio',
+    audioSettingsMute: 'Sound',
+    audioSettingsVolume: 'Volume',
+    audioSettingsOpen: 'Audio settings',
+    audioSettingsClose: 'Close audio panel',
   },
 };
 

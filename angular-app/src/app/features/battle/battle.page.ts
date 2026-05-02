@@ -1,10 +1,12 @@
 import { afterNextRender, Component, computed, DestroyRef, inject } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AudioSettingsFabComponent } from '../../shared/components/audio-settings-fab/audio-settings-fab.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { COMBAT_ZOOM_SCALE, WINS_TO_WIN_SERIES } from '../../core/engine/game-rules';
 import { combatLogEntriesToHtml } from '../../core/engine/combat-log.format';
 import { GameStateService } from '../../core/services/game-state.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { SoundService } from '../../core/services/sound.service';
 import type { BattleCard } from '../../core/models/battle-card.model';
 
 /** Same breakpoint as `lucas-cards.scss` (viewports under 900px). */
@@ -13,13 +15,14 @@ const MOBILE_BATTLE_ZOOM_MQ = '(max-width: 899px)';
 @Component({
   selector: 'app-battle-page',
   standalone: true,
-  imports: [CardComponent],
+  imports: [AudioSettingsFabComponent, CardComponent],
   templateUrl: './battle.page.html',
   styleUrl: './battle.page.scss',
 })
 export class BattlePageComponent {
   readonly gs = inject(GameStateService);
   readonly i18n = inject(I18nService);
+  private readonly sound = inject(SoundService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -80,16 +83,19 @@ export class BattlePageComponent {
   readonly combatEventTitle = computed(() => (this.i18n.isEn() ? 'Battle log' : 'Registro de combate'));
 
   constructor() {
+    this.sound.startBattleAmbient();
+    this.destroyRef.onDestroy(() => this.sound.stopAmbientMusic());
+
     const gs = this.gs;
     afterNextRender(() => {
       if (typeof matchMedia === 'undefined') return;
       const mq = matchMedia(MOBILE_BATTLE_ZOOM_MQ);
       const applyMobileZoom = (isMobile: boolean) => {
         if (isMobile) {
-          gs.setCombatZoom(1);
+          gs.setCombatZoom(1, false);
           const g = gs.game();
           if (g.auto) gs.toggleAuto();
-          else if (g.speed === 2) gs.setSpeed(1);
+          else if (g.speed === 2) gs.setSpeed(1, false);
         }
       };
       applyMobileZoom(mq.matches);

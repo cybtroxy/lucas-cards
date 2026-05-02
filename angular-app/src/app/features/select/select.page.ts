@@ -4,10 +4,12 @@ import {
   computed,
   HostListener,
   inject,
+  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
 import { REFERENCE_ORDER } from '../../core/i18n/card-reference';
+import { AudioSettingsFabComponent } from '../../shared/components/audio-settings-fab/audio-settings-fab.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { CardsCatalogService } from '../../core/services/cards-catalog.service';
 import { GameStateService } from '../../core/services/game-state.service';
@@ -27,11 +29,11 @@ import type { ShopOfferSlot } from '../../core/models/game-state.model';
 @Component({
   selector: 'app-select-page',
   standalone: true,
-  imports: [CardComponent, DragDropModule],
+  imports: [AudioSettingsFabComponent, CardComponent, DragDropModule],
   templateUrl: './select.page.html',
   styleUrl: './select.page.scss',
 })
-export class SelectPageComponent implements OnInit {
+export class SelectPageComponent implements OnInit, OnDestroy {
   readonly gs = inject(GameStateService);
   readonly catalog = inject(CardsCatalogService);
   readonly i18n = inject(I18nService);
@@ -48,6 +50,11 @@ export class SelectPageComponent implements OnInit {
     if (this.gs.game().shopOfferSlots.length === 0) {
       this.gs.prepareSelectPool();
     }
+    this.sound.startShoppingAmbient();
+  }
+
+  ngOnDestroy(): void {
+    this.sound.stopAmbientMusic();
   }
 
   readonly maxSlots = computed(() => this.gs.maxSlotsForCurrentSelect());

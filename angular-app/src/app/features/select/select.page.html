@@ -95,9 +95,12 @@
         ¡A la batalla!
       </button>
     </div>
-    <button type="button" class="btn-secondary select-glossary-btn" (click)="openGlossary()">
-      {{ i18n.tUi('selectGlossaryBtn') }}
-    </button>
+    <div class="select-footer-tools">
+      <button type="button" class="btn-secondary select-glossary-btn" (click)="openGlossary()">
+        {{ i18n.tUi('selectGlossaryBtn') }}
+      </button>
+      <app-audio-settings-fab layout="selectTools" />
+    </div>
   </footer>
 
   @if (glossaryOpen()) {

@@ -701,8 +701,16 @@ app-result-page {
   align-items: center;
   gap: 12px;
 }
+.select-footer-tools {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .select-footer .select-glossary-btn {
-  align-self: center;
+  margin: 0;
 }
 
 /* ===== Carta ===== */
@@ -1216,6 +1224,22 @@ app-card {
   min-height: 0;
   width: 100%;
 }
+
+/* Chip / panel de registro de combate + engrane de audio (esquina inferior izquierda). */
+.battle-side-dock {
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 45;
+  pointer-events: none;
+}
+.battle-side-dock > * {
+  pointer-events: auto;
+}
 #screen-battle .side .side-scale {
   display: flex;
   flex-direction: row;
@@ -1296,16 +1320,16 @@ app-card {
   transition: max-height 0.2s ease, min-height 0.2s ease, width 0.2s ease;
 }
 .combat-event-panel.is-float {
-  position: absolute;
-  left: 10px;
+  position: relative;
+  left: auto;
   right: auto;
-  bottom: 12px;
+  bottom: auto;
   max-height: min(36vh, 300px);
 }
 .combat-event-panel.is-min {
-  position: absolute;
-  left: max(12px, env(safe-area-inset-left));
-  bottom: max(12px, env(safe-area-inset-bottom));
+  position: relative;
+  left: auto;
+  bottom: auto;
   right: auto;
   top: auto;
   transform: none;
