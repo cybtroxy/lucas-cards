@@ -7,6 +7,14 @@
   width: 100%;
 }
 
+/* Dificultad rivala junto al trofeo: muy discreta */
+.rival-difficulty-hint {
+  font-size: 0.72em;
+  font-weight: 500;
+  color: rgba(255, 248, 220, 0.42);
+  letter-spacing: 0.02em;
+}
+
 /* Llena el host; la arena usa flex:1 dentro de la columna. */
 #screen-battle.screen {
   flex: 1 1 auto;

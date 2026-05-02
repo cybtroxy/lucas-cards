@@ -36,7 +36,7 @@ export class CardComponent implements OnDestroy {
   side = input<'player' | 'rival'>('player');
   extraClass = input('');
   /** Estrellas por apilamiento (selección) o copias en batalla. */
-  stackStars = input<0 | 1 | 2>(0);
+  stackStars = input<0 | 1 | 2 | 3>(0);
   /** Valores base del catálogo para desglose en el popover (PV/ATK mejorados). */
   statPopoverBase = input<{ hp: number; atk: number } | null>(null);
   /** Desactiva el popover de stats (p. ej. miniaturas). */
@@ -76,11 +76,11 @@ export class CardComponent implements OnDestroy {
     return c.uid ?? c.id;
   });
 
-  protected displayStars = computed((): 0 | 1 | 2 => {
+  protected displayStars = computed((): 0 | 1 | 2 | 3 => {
     const s = this.stackStars();
     if (s > 0) return s;
     const c = this.card() as BattleCard;
-    return (c.stackStars ?? 0) as 0 | 1 | 2;
+    return (c.stackStars ?? 0) as 0 | 1 | 2 | 3;
   });
 
   protected starMarks = computed(() => Array.from({ length: this.displayStars() }));

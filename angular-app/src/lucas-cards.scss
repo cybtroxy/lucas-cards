@@ -316,50 +316,64 @@ app-result-page {
 .rules .ico { font-size: 1.1em; }
 
 /* ===== Pantalla Selección ===== */
-.select-header {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding: 24px 16px 8px;
-}
-.select-header h2 {
-  font-family: 'Cinzel', serif;
-  margin: 0 0 6px;
-  font-size: 32px;
-  color: var(--gold);
-  text-shadow: 0 2px 0 #5a3a06;
-}
-.select-header .hint {
-  margin: 0 0 8px;
-  color: var(--ink-dim);
-}
-.select-coins-panel {
-  margin: 10px auto 0;
-  padding: 10px 16px;
-  max-width: 360px;
-  background: rgba(0,0,0,.25);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  font-size: 14px;
-  color: var(--ink);
-}
-.select-coins-panel .coins-line {
-  margin: 4px 0;
+/* Chips fijos bajo la barra de serie: ronda de referencia (izq.) y saldo (dcha.). */
+#screen-select .select-round-mob,
+#screen-select .select-coins-mob {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 52px);
+  z-index: 1001;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink, #eaf0ff);
+  pointer-events: none;
+  box-sizing: border-box;
 }
-.coins-line__icon {
-  font-size: 1.15em;
+
+#screen-select .select-round-mob {
+  left: max(10px, env(safe-area-inset-left, 0px) + 8px);
+  border: 1px solid rgba(245, 196, 81, 0.35);
+}
+
+#screen-select .select-round-mob__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim, #aab4d4);
+}
+
+#screen-select .select-round-mob__value {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold, #f5c451);
   line-height: 1;
 }
-#coins-spent { color: var(--gold); }
-#coins-left { color: #4ade80; }
 
-/* Móvil: chip de saldo (solo visible bajo 900px; ver media query) */
-.select-coins-mob {
-  display: none;
+#screen-select .select-coins-mob {
+  right: max(10px, env(safe-area-inset-right, 0px) + 8px);
+  gap: 4px;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+#screen-select .select-coins-mob__icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+#screen-select .select-coins-mob__value {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #4ade80;
+  line-height: 1;
 }
 
 .series-line {
@@ -377,12 +391,12 @@ app-result-page {
 .hidden { display: none !important; }
 
 /* Selección: scroll vertical cuando el contenido supera el viewport.
-   Hueco bajo la barra de serie fija: ~48px de contenido + safe-area superior (iPhone en vertical). */
+   Hueco bajo barra de serie + fila de chips (Round / 💰). */
 #screen-select.active {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 100px);
   box-sizing: border-box;
 }
 /* Solo selección: fondo fijo para que al hacer scroll no quede franja bajo la barra de serie.
@@ -797,25 +811,6 @@ app-result-page {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.card .card-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 6px;
-  padding: 2px 6px 5px;
-  background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
-  font-size: 9px;
-  font-weight: 700;
-  color: #cbd5e1;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
-}
-.card .card-meta-row .meta-pill {
-  background: rgba(0,0,0,.35);
-  padding: 1px 5px;
-  border-radius: 4px;
-  text-transform: none;
 }
 .card .stats {
   display: flex;
@@ -1805,39 +1800,6 @@ app-card {
     --lucas-select-card-gap: 12px;
   }
   .game-title { font-size: 36px; }
-  #screen-select .select-header {
-    display: none !important;
-  }
-  #screen-select .select-coins-mob {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    position: fixed;
-    /* Alineado bajo la barra de serie (48px contenido + safe area en su padding-top). */
-    top: calc(env(safe-area-inset-top, 0px) + 52px);
-    right: max(10px, env(safe-area-inset-right, 0px) + 8px);
-    z-index: 1001;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid rgba(74, 222, 128, 0.35);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink, #eaf0ff);
-    pointer-events: none;
-  }
-  .select-coins-mob__icon {
-    font-size: 1.1em;
-    line-height: 1;
-  }
-  .select-coins-mob__value {
-    font-family: 'Cinzel', serif;
-    font-size: 16px;
-    font-weight: 800;
-    color: #4ade80;
-    line-height: 1;
-  }
   #screen-select .hint,
   #screen-select .section-hint {
     display: none;

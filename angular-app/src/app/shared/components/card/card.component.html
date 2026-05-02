@@ -29,9 +29,6 @@
           <span class="emoji">{{ card().art || '❔' }}</span>
         }
       </div>
-      <div class="card-meta-row">
-        <span class="meta-pill">{{ i18n.t('ability', card().ability) }}</span>
-      </div>
       <div class="stats">
         <div class="stat atk"><span class="ico">⚔️</span><span class="val-atk">{{ card().atk }}</span></div>
         <div class="stat hp"><span class="ico">❤️</span><span class="val-hp">{{ displayStatHp() }}</span></div>
@@ -82,9 +79,17 @@
           <span class="card-stat-popover__label">ATQ</span>
           <span class="card-stat-popover__val">
             @if (card().atk !== base.atk) {
-              <span class="muted">{{ base.atk }}</span>
-              → <strong>{{ card().atk }}</strong>
-              <span class="tag">+50%</span>
+              <span class="card-stat-popover__delta">
+                <span class="muted">{{ base.atk }}</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <strong>{{ card().atk }}</strong>
+                @if (displayStars() === 2) {
+                  <span class="tag">+50%</span>
+                }
+                @if (displayStars() === 3) {
+                  <span class="tag">+70%</span>
+                }
+              </span>
             } @else {
               <strong>{{ card().atk }}</strong>
             }
@@ -93,13 +98,23 @@
         <div class="card-stat-popover__row">
           <span class="card-stat-popover__label">PV</span>
           <span class="card-stat-popover__val">
-            <span class="muted">{{ base.hp }}</span>
-            → <strong>{{ card().hp }}</strong>
-            @if (displayStars() === 1) {
-              <span class="tag">+30%</span>
-            }
-            @if (displayStars() === 2) {
-              <span class="tag">+50%</span>
+            @if (card().hp !== base.hp) {
+              <span class="card-stat-popover__delta">
+                <span class="muted">{{ base.hp }}</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <strong>{{ card().hp }}</strong>
+                @if (displayStars() === 1) {
+                  <span class="tag">+30%</span>
+                }
+                @if (displayStars() === 2) {
+                  <span class="tag">+50%</span>
+                }
+                @if (displayStars() === 3) {
+                  <span class="tag">+70%</span>
+                }
+              </span>
+            } @else {
+              <strong>{{ card().hp }}</strong>
             }
           </span>
         </div>
@@ -115,14 +130,11 @@
       }
     </div>
     <div class="card-stat-popover__meta">
-      <div>
-        @if (card().type) {
-          {{ i18n.t('type', card().type) }}
-          ·
-        }
-        Niv. {{ card().level || 1 }}
-      </div>
-      <div class="card-stat-popover__ability">{{ i18n.t('ability', card().ability) }}</div>
+      @if (card().type) {
+        {{ i18n.t('type', card().type) }}
+        ·
+      }
+      Niv. {{ card().level || 1 }}
     </div>
   </div>
 }

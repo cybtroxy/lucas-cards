@@ -4,7 +4,6 @@ import {
   computed,
   HostListener,
   inject,
-  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
@@ -13,10 +12,12 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { CardsCatalogService } from '../../core/services/cards-catalog.service';
 import { GameStateService } from '../../core/services/game-state.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { SoundCue, SoundService } from '../../core/services/sound.service';
 import {
   SHOP_MAX_SAME_CARD,
   SHOP_OFFER_COUNT,
-  shopLevelRangeFromAsalto,
+  SHOP_REFRESH_COST,
+  shopLevelRangeFromPartida,
   stackStatsFromCopies,
 } from '../../core/engine/game-rules';
 import type { Card } from '../../core/models/card.model';
@@ -30,10 +31,11 @@ import type { ShopOfferSlot } from '../../core/models/game-state.model';
   templateUrl: './select.page.html',
   styleUrl: './select.page.scss',
 })
-export class SelectPageComponent implements OnInit, OnDestroy {
+export class SelectPageComponent implements OnInit {
   readonly gs = inject(GameStateService);
   readonly catalog = inject(CardsCatalogService);
   readonly i18n = inject(I18nService);
+  readonly sound = inject(SoundService);
 
   readonly game = this.gs.game;
 
@@ -41,9 +43,6 @@ export class SelectPageComponent implements OnInit, OnDestroy {
   readonly refOrder = REFERENCE_ORDER;
 
   readonly glossaryOpen = signal(false);
-  /** Aviso efímero cuando el mazo está lleno de huecos y se intenta añadir carta nueva. */
-  readonly deckFullHint = signal<string | null>(null);
-  private deckFullHintTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     if (this.gs.game().shopOfferSlots.length === 0) {
@@ -62,16 +61,20 @@ export class SelectPageComponent implements OnInit, OnDestroy {
   );
 
   readonly shopHint = computed(() => {
-    const a = this.gs.game().shopAsaltoForNextSelect;
-    const r = shopLevelRangeFromAsalto(a);
-    return `Según el asalto de referencia ${a}, la tienda solo incluye cartas de nivel ${r.min}–${r.max}. ${SHOP_OFFER_COUNT} casillas; la misma carta puede repetirse hasta ${SHOP_MAX_SAME_CARD} veces. Al elegir una, su hueco queda vacío hasta refrescar.`;
+    const partida = this.gs.game().shopAsaltoForNextSelect;
+    const r = shopLevelRangeFromPartida(partida);
+    return `Partida ${partida} de la serie: la tienda solo incluye cartas de nivel ${r.min}–${r.max}. ${SHOP_OFFER_COUNT} casillas; la misma carta puede repetirse hasta ${SHOP_MAX_SAME_CARD} veces. Al elegir una, su hueco queda vacío hasta refrescar.`;
   });
 
   readonly shopCoinsLeft = computed(() => this.gs.selectShopCoinsLeft());
 
+  /** Coste fijo de refrescar la tienda (no depende del round). */
+  readonly shopRefreshCost = computed(() => SHOP_REFRESH_COST);
+
   readonly canStart = computed(() => this.gs.canStartBattle());
 
-  readonly upcomingPartida = computed(() => this.game().gamesInSeries + 1);
+  /** Número de partida de la serie según el que se filtra la tienda (coincide con el hint). */
+  readonly shopAsaltoRef = computed(() => this.game().shopAsaltoForNextSelect);
 
   slotViewCard(slot: DeckSlot): Card {
     const raw = this.catalog.findById(slot.id)!;
@@ -84,7 +87,7 @@ export class SelectPageComponent implements OnInit, OnDestroy {
     return { hp: raw.hp, atk: raw.atk };
   }
 
-  slotStars(slot: DeckSlot): 0 | 1 | 2 {
+  slotStars(slot: DeckSlot): 0 | 1 | 2 | 3 {
     const raw = this.catalog.findById(slot.id)!;
     return stackStatsFromCopies(slot.copies, raw.hp, raw.atk).stars;
   }
@@ -104,34 +107,15 @@ export class SelectPageComponent implements OnInit, OnDestroy {
     const card = slot.card;
     if (!card) return;
     if (!this.gs.canAddCard(card)) {
-      if (this.gs.isCardInCurrentShop(card)) {
-        this.flashDeckFullHint();
-      }
+      this.sound.play(SoundCue.Denial);
       return;
     }
     this.gs.addCardFromShopSlot(slot.slotUid);
-  }
-
-  private flashDeckFullHint(): void {
-    if (this.deckFullHintTimer != null) {
-      clearTimeout(this.deckFullHintTimer);
-      this.deckFullHintTimer = null;
-    }
-    this.deckFullHint.set(this.i18n.tUi('selectDeckFullToast'));
-    this.deckFullHintTimer = setTimeout(() => {
-      this.deckFullHint.set(null);
-      this.deckFullHintTimer = null;
-    }, 3200);
-  }
-
-  ngOnDestroy(): void {
-    if (this.deckFullHintTimer != null) {
-      clearTimeout(this.deckFullHintTimer);
-    }
+    this.sound.play(SoundCue.ShopPick);
   }
 
   onDeckSlotClick(slot: DeckSlot): void {
-    this.gs.removeCopyFromDeckSlot(slot.uid);
+    this.gs.removeDeckSlot(slot.uid);
   }
 
   drop(event: CdkDragDrop<unknown>): void {

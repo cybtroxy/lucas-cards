@@ -25,6 +25,22 @@ export class BattlePageComponent {
 
   readonly game = this.gs.game;
 
+  /** Etiqueta de dificultad del rival en esta partida (tienda simulada); null si no hay dato. */
+  readonly rivalDifficultyLabel = computed(() => {
+    const t = this.game().rivalDifficultyThisPartida;
+    if (t == null) return null;
+    switch (t) {
+      case 'easy':
+        return this.i18n.tUi('rivalDifficultyEasy');
+      case 'normal':
+        return this.i18n.tUi('rivalDifficultyNormal');
+      case 'hard':
+        return this.i18n.tUi('rivalDifficultyHard');
+      default:
+        return null;
+    }
+  });
+
   /** Mazos en arena: sin cartas ya retiradas tras animación de K.O. */
   readonly playerDeckRevVisible = computed(() => {
     const g = this.gs.game();

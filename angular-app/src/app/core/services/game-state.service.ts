@@ -12,28 +12,30 @@ import type {
 } from '../models/game-state.model';
 import type { DeckSlot } from '../models/deck-slot.model';
 import { newDeckSlotUid, persistedSlotsToDeckSlots } from '../models/deck-slot.model';
-import { BattleService } from './battle.service';
 import { CardsCatalogService } from './cards-catalog.service';
 import { I18nService } from './i18n.service';
+import { SoundCue, SoundService } from './sound.service';
 import type { StrikeParticipant } from '../engine/combat.engine';
 import { applySimultaneousExchange, sumAttackerHealFromStrikeDetail } from '../engine/combat.engine';
 import {
   applyCoinsAfterGame,
   awardGloryAfterPartida,
-  coinsBonusAfterPartida,
+  coinsRefundWhenRemovingDeckSlot,
   DEFAULT_COMBAT_ZOOM,
   ensureMinCoins,
   fillShopOffers,
   MAX_COPIES_PER_DECK_SLOT_STACK,
   MAX_DUEL_ASALTOS,
+  INITIAL_PLAYER_COINS,
   MIN_BASE_COINS_PER_PARTIDA,
   MIN_DECK,
   maxSelectableSlotsForPartida,
-  pickRivalDeckBase,
+  rivalShopBudgetForPartida,
   SHOP_REFRESH_COST,
   stackStatsFromCopies,
   WINS_TO_WIN_SERIES,
 } from '../engine/game-rules';
+import { simulateRivalDeckSelection } from '../engine/rival-deck-selection';
 import { nowMs } from '../engine/game-utils';
 import { combatLogEntriesToHtml, formatCombatFaintLine } from '../engine/combat-log.format';
 
@@ -68,10 +70,11 @@ function createInitialState(): GameState {
     seriesWinsP: 0,
     seriesWinsR: 0,
     gamesInSeries: 0,
-    coinsForPlayer: MIN_BASE_COINS_PER_PARTIDA,
-    coinsForRival: MIN_BASE_COINS_PER_PARTIDA,
-    playerCoinsStart: MIN_BASE_COINS_PER_PARTIDA,
-    rivalCoinsStart: MIN_BASE_COINS_PER_PARTIDA,
+    coinsForPlayer: INITIAL_PLAYER_COINS,
+    coinsForRival: INITIAL_PLAYER_COINS,
+    playerCoinsStart: INITIAL_PLAYER_COINS,
+    rivalCoinsStart: INITIAL_PLAYER_COINS,
+    rivalDifficultyThisPartida: null,
     spentP: 0,
     spentR: 0,
     playerTrophy: 0,
@@ -92,9 +95,9 @@ function createInitialState(): GameState {
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
   private readonly router = inject(Router);
-  private readonly battleSvc = inject(BattleService);
   private readonly catalog = inject(CardsCatalogService);
   private readonly i18n = inject(I18nService);
+  private readonly sound = inject(SoundService);
 
   /** Estado único del juego (signal + observable equivalente a BehaviorSubject). */
   private readonly _game = signal<GameState>(createInitialState());
@@ -127,14 +130,18 @@ export class GameStateService {
   prepareSelectPool(): void {
     this.setGame((g) => {
       g.playerCoinsStart = g.coinsForPlayer;
-      g.rivalCoinsStart = g.coinsForRival;
+      const rb = rivalShopBudgetForPartida(g.playerCoinsStart, Math.random);
+      g.rivalCoinsStart = rb.budget;
+      g.rivalDifficultyThisPartida = rb.tier;
       g.shopRefreshCoinsSpent = 0;
       if (g.lastPartidaDeckSlots.length) {
         g.deckSlots = persistedSlotsToDeckSlots(g.lastPartidaDeckSlots);
       } else {
         g.deckSlots = [];
       }
-      g.shopOfferSlots = fillShopOffers(this.catalog.cards, g.shopAsaltoForNextSelect);
+      const partidaRef = Math.max(1, g.gamesInSeries + 1);
+      g.shopAsaltoForNextSelect = partidaRef;
+      g.shopOfferSlots = fillShopOffers(this.catalog.cards, partidaRef);
     });
   }
 
@@ -184,18 +191,15 @@ export class GameStateService {
     });
   }
 
-  removeCopyFromDeckSlot(slotUid: string): void {
+  /** Quita el hueco completo (todas las copias apiladas) y devuelve monedas según estrellas del apilado. */
+  removeDeckSlot(slotUid: string): void {
     this.setGame((g) => {
       const idx = g.deckSlots.findIndex((s) => s.uid === slotUid);
       if (idx < 0) return;
       const s = g.deckSlots[idx];
-      if (s.copies <= 1) {
-        g.deckSlots = g.deckSlots.filter((x) => x.uid !== slotUid);
-      } else {
-        g.deckSlots = g.deckSlots.map((x) =>
-          x.uid === slotUid ? { ...x, copies: x.copies - 1 } : x,
-        );
-      }
+      const refund = coinsRefundWhenRemovingDeckSlot(s.copies);
+      g.playerCoinsStart += refund;
+      g.deckSlots = g.deckSlots.filter((x) => x.uid !== slotUid);
     });
   }
 
@@ -214,7 +218,9 @@ export class GameStateService {
     if (left < SHOP_REFRESH_COST) return;
     this.setGame((s) => {
       s.shopRefreshCoinsSpent += SHOP_REFRESH_COST;
-      s.shopOfferSlots = fillShopOffers(this.catalog.cards, s.shopAsaltoForNextSelect);
+      const p = Math.max(1, s.gamesInSeries + 1);
+      s.shopAsaltoForNextSelect = p;
+      s.shopOfferSlots = fillShopOffers(this.catalog.cards, p);
     });
   }
 
@@ -241,7 +247,6 @@ export class GameStateService {
       currentHp: card.hp,
       alive: true,
       uid: `${card.id}-${Math.random().toString(36).slice(2, 7)}`,
-      battle: this.battleSvc.createBattleState(card.ability),
       catalogHp: card.hp,
       catalogAtk: card.atk,
     };
@@ -257,7 +262,6 @@ export class GameStateService {
       currentHp: st.hp,
       alive: true,
       uid: `${base.id}-${Math.random().toString(36).slice(2, 7)}`,
-      battle: this.battleSvc.createBattleState(base.ability),
       stackCopies: slot.copies,
       stackStars: st.stars,
       catalogHp: base.hp,
@@ -273,10 +277,15 @@ export class GameStateService {
       g.spentP = 0;
       g.lastPartidaDeckSlots = g.deckSlots.map(({ id, copies }) => ({ id, copies }));
       g.playerDeck = g.deckSlots.map((slot) => this.instantiateFromSlot(slot));
-      const usedIds = [...new Set(g.deckSlots.map((s) => s.id))];
-      const rawRival = pickRivalDeckBase(g.rivalCoinsStart, usedIds);
-      g.rivalDeck = rawRival.map((c) => this.instantiate(c));
-      g.spentR = rawRival.reduce((s, c) => s + (Number(c.level) || 0), 0);
+      const partidaN = Math.max(1, g.gamesInSeries + 1);
+      const rivalSel = simulateRivalDeckSelection({
+        rivalCoinBudget: g.rivalCoinsStart,
+        partidaNumber: partidaN,
+        catalog: this.catalog.cards,
+        rng: Math.random,
+      });
+      g.rivalDeck = rivalSel.deckSlots.map((slot) => this.instantiateFromSlot(slot));
+      g.spentR = g.rivalDeck.reduce((s, c) => s + (Number(c.level) || 0), 0);
       g.battleIdx = { p: 0, r: 0 };
       g.round = 1;
       g.endedReason = null;
@@ -474,6 +483,9 @@ export class GameStateService {
     });
 
     await this.pace(280);
+    if (ex.damageToRival > 0) this.sound.play(SoundCue.BattleHitEnemy);
+    if (ex.damageToPlayer > 0) this.sound.play(SoundCue.BattleHitPlayer);
+    if (healP > 0 || healR > 0) this.sound.play(SoundCue.BattleHeal);
     this.setGame((g) => {
       g.battleUi = {
         ...g.battleUi,
@@ -506,14 +518,10 @@ export class GameStateService {
 
     this.setGame((g) => {
       g.playerDeck = g.playerDeck.map((c) =>
-        c.uid === p.uid
-          ? { ...c, currentHp: p.currentHp, alive: p.alive, battle: { ...p.battle! } }
-          : { ...c, battle: { ...c.battle } },
+        c.uid === p.uid ? { ...c, currentHp: p.currentHp, alive: p.alive } : c,
       );
       g.rivalDeck = g.rivalDeck.map((c) =>
-        c.uid === r.uid
-          ? { ...c, currentHp: r.currentHp, alive: r.alive, battle: { ...r.battle! } }
-          : { ...c, battle: { ...c.battle } },
+        c.uid === r.uid ? { ...c, currentHp: r.currentHp, alive: r.alive } : c,
       );
     });
 
@@ -526,6 +534,7 @@ export class GameStateService {
 
   /** Doble K.O.: mismas fases de tiempo que una sola muerte, ambas cartas a la vez. */
   private async animateDoubleFaint(pCard: BattleCard, rCard: BattleCard): Promise<void> {
+    this.sound.play(SoundCue.BattleDeathDouble);
     const isEn = this.i18n.isEn();
     this.setGame((g) => {
       g.combatLogEntries.push(
@@ -561,6 +570,9 @@ export class GameStateService {
   }
 
   private async animateFaint(side: 'player' | 'rival', card: BattleCard): Promise<void> {
+    this.sound.play(SoundCue.BattleDeathSingle);
+    if (side === 'rival') this.sound.play(SoundCue.BattleRoundWin);
+    else this.sound.play(SoundCue.BattleRoundLose);
     const isEn = this.i18n.isEn();
     this.setGame((g) => {
       g.combatLogEntries.push({
@@ -591,8 +603,9 @@ export class GameStateService {
   }
 
   private finishBattle(winner: BattleWinner): void {
+    if (winner === 'player') this.sound.play(SoundCue.BattleMatchWin);
+    else if (winner === 'rival') this.sound.play(SoundCue.BattleMatchLose);
     this.setGame((g) => {
-      g.shopAsaltoForNextSelect = Math.max(1, g.round);
       g.running = false;
       g.endedReason = winner;
       g.combatLogView = 'min';
@@ -611,10 +624,9 @@ export class GameStateService {
     const coins = applyCoinsAfterGame({
       playerCoinsStart: snap.playerCoinsStart,
       rivalCoinsStart: snap.rivalCoinsStart,
-      gamesInSeries,
+      winner,
     });
     const ensured = ensureMinCoins(coins.coinsForPlayer, coins.coinsForRival);
-    const grantFib = coinsBonusAfterPartida(gamesInSeries);
 
     const glory = awardGloryAfterPartida({
       winner,
@@ -636,7 +648,7 @@ export class GameStateService {
     if (isDraw) {
       emoji = '🤝';
       title = 'Empate en la partida';
-      subtitle = `Ninguno suma victoria en la serie. Próximo: base + arrastre completo + bono +${grantFib} (total ${ensured.coinsForPlayer} 💰 tú). Gloria +${glory.gainedP}.`;
+      subtitle = `Ninguno suma victoria en la serie. Monedas: arrastre + ${3 * SHOP_REFRESH_COST} 💰 (3× refresco fijo ${SHOP_REFRESH_COST}), sin extra por empate. Total tú: ${ensured.coinsForPlayer}. Gloria +${glory.gainedP}.`;
     } else if (isWin) {
       emoji = '🏆';
       title = '¡Ganaste la partida!';
@@ -667,7 +679,7 @@ export class GameStateService {
       gloryGainedP: glory.gainedP,
       gloryGainedR: glory.gainedR,
       seriesOver,
-      grantFib,
+      economyRefreshCostRef: SHOP_REFRESH_COST,
       survivorsP,
       deckLenP: snap.playerDeck.length,
       totalDmgDealt,

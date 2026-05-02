@@ -5,7 +5,7 @@ import {
 } from '../i18n/card-reference';
 
 export type LucasLang = 'es' | 'en';
-export type I18nCategory = 'type' | 'ability';
+export type I18nCategory = 'type';
 
 const STORAGE_KEY = 'lucasCardLang';
 
@@ -28,22 +28,6 @@ const MAPS: Record<
       energy: 'Energía',
       love: 'Amor',
     },
-    ability: {
-      life_steal: 'Robo de vida',
-      crit_chance: 'Golpe crítico',
-      shield: 'Escudo',
-      first_strike: 'Primer golpe',
-      execute: 'Ejecución',
-      burn: 'Quemadura',
-      stun: 'Aturdir',
-      psychic_blast: 'Ola psíquica',
-      heal: 'Curación',
-      buff_next: 'Impulso',
-      revive: 'Revivir',
-      damage_reduce: 'Resistencia',
-      armor: 'Blindaje',
-      pierce: 'Perforar',
-    },
   },
   en: {
     type: {
@@ -60,56 +44,39 @@ const MAPS: Record<
       energy: 'Energy',
       love: 'Love',
     },
-    ability: {
-      life_steal: 'Life steal',
-      crit_chance: 'Critical hit',
-      shield: 'Shield',
-      first_strike: 'First strike',
-      execute: 'Execute',
-      burn: 'Burn',
-      stun: 'Stun',
-      psychic_blast: 'Psychic blast',
-      heal: 'Heal',
-      buff_next: 'Buff next',
-      revive: 'Revive',
-      damage_reduce: 'Damage reduction',
-      armor: 'Armor',
-      pierce: 'Pierce',
-    },
   },
 };
 
 const UI: Record<LucasLang, Record<string, string>> = {
   es: {
     typeBadgeTitle: 'Tipo',
-    selectGlossaryBtn: 'Guía: tipos y habilidades',
+    selectGlossaryBtn: 'Guía: tipos',
     selectGlossaryTitle: 'Guía de cartas',
-    selectGlossaryIntro:
-      'Consulta cómo actúan los tipos en combate y el efecto exacto de cada habilidad.',
+    selectGlossaryIntro: 'Consulta cómo actúan los tipos elementales en combate.',
     selectGlossaryClose: 'Cerrar',
     refSectionTypes: 'Tipos elementales (combate)',
-    refSectionAbilities: 'Habilidades',
     refColName: 'Nombre',
     refColDesc: 'Descripción',
-    selectDeckFullToast:
-      'Quita una carta del mazo para poder añadir otras nuevas.',
     resultCombatDetailToggle: 'Detalle de combate',
     selectShopCoinsAria: 'Saldo disponible para refrescar la tienda',
+    rivalDifficultyEasy: 'Fácil',
+    rivalDifficultyNormal: 'Normal',
+    rivalDifficultyHard: 'Difícil',
   },
   en: {
     typeBadgeTitle: 'Type',
-    selectGlossaryBtn: 'Guide: types & abilities',
+    selectGlossaryBtn: 'Guide: types',
     selectGlossaryTitle: 'Card guide',
-    selectGlossaryIntro:
-      'How elemental types work in combat and each ability’s exact effect.',
+    selectGlossaryIntro: 'How elemental types work in combat.',
     selectGlossaryClose: 'Close',
     refSectionTypes: 'Elemental types (combat)',
-    refSectionAbilities: 'Abilities',
     refColName: 'Name',
     refColDesc: 'Description',
-    selectDeckFullToast: 'Remove a card from your deck to add new ones.',
     resultCombatDetailToggle: 'Battle details',
     selectShopCoinsAria: 'Balance available to refresh the shop',
+    rivalDifficultyEasy: 'Easy',
+    rivalDifficultyNormal: 'Normal',
+    rivalDifficultyHard: 'Hard',
   },
 };
 
@@ -167,7 +134,7 @@ export class I18nService {
     return this.lang() === 'en';
   }
 
-  /** Texto largo para glosario (tipos, habilidades) en pantalla de selección. */
+  /** Texto largo para glosario de tipos en pantalla de selección. */
   tReferenceDesc(kind: ReferenceKind, code: string): string {
     return referenceDescription(this.lang(), kind, code);
   }

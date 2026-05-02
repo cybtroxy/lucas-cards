@@ -11,6 +11,9 @@ export interface ShopOfferSlot {
 
 export type BattleWinner = 'player' | 'rival' | 'draw';
 
+/** Dificultad del rival en la partida (tirada al abrir selección; presupuesto vs. jugador). */
+export type RivalDifficultyTier = 'easy' | 'normal' | 'hard';
+
 export type CombatLogViewMode = 'float' | 'min' | 'modal';
 
 /** Entrada del registro de combate estructurado (sustituye HTML acumulado). */
@@ -40,6 +43,8 @@ export interface GameState {
   coinsForRival: number;
   playerCoinsStart: number;
   rivalCoinsStart: number;
+  /** Tirada de dificultad rival al abrir esta selección (afecta presupuesto tienda simulado vs. jugador). */
+  rivalDifficultyThisPartida: RivalDifficultyTier | null;
   spentP: number;
   spentR: number;
 
@@ -60,6 +65,7 @@ export interface GameState {
   /** Casillas fijas de la tienda (longitud constante); `card: null` = hueco ya elegido o sin rellenar. */
   shopOfferSlots: ShopOfferSlot[];
   shopRefreshCoinsSpent: number;
+  /** Número de partida de la serie usado para el rango de niveles de la tienda (≈ `gamesInSeries + 1` al abrir selección). */
   shopAsaltoForNextSelect: number;
 
   /** UI de batalla: fase de animación del asalto actual. */
@@ -88,7 +94,8 @@ export interface BattleResultSnapshot {
   gloryGainedP: number;
   gloryGainedR: number;
   seriesOver: boolean;
-  grantFib: number;
+  /** Coste de refresco de tienda usado en la economía de esta partida (= SHOP_REFRESH_COST). */
+  economyRefreshCostRef: number;
   survivorsP: number;
   deckLenP: number;
   totalDmgDealt: number;

@@ -205,11 +205,6 @@
   padding-right: 18px;
 }
 
-.ref-table--abilities .ref-table__name {
-  white-space: normal;
-  min-width: 8.5rem;
-}
-
 @media (max-width: 540px) {
   .ref-table th,
   .ref-table td {
@@ -246,39 +241,6 @@
   .ref-table td:not(.ref-table__name) {
     font-size: 13px;
     color: #cbd5e1;
-  }
-}
-
-/* Aviso superficial: mazo sin huecos libres para cartas nuevas */
-.select-deck-full-toast {
-  position: fixed;
-  left: 50%;
-  bottom: 96px;
-  transform: translateX(-50%);
-  z-index: 2600;
-  max-width: min(420px, calc(100% - 32px));
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.97), rgba(15, 23, 42, 0.98));
-  border: 1px solid rgba(245, 196, 81, 0.45);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  color: #fde68a;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  text-align: center;
-  pointer-events: none;
-  animation: select-toast-in 0.22s ease-out;
-}
-
-@keyframes select-toast-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
   }
 }
 

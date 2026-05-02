@@ -16,8 +16,6 @@ export interface StrikeDetail {
   defenderName?: string;
   attackerType?: string;
   defenderType?: string;
-  attackAbility?: string;
-  defendAbility?: string;
 }
 
 /** Resultado de applySimultaneousExchange. */

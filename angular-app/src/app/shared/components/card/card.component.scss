@@ -79,6 +79,7 @@
 }
 
 .card-stat-popover__label {
+  flex-shrink: 0;
   color: #94a3b8;
   font-weight: 600;
   font-size: 11px;
@@ -89,6 +90,25 @@
 .card-stat-popover__val {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card-stat-popover__delta {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  max-width: 100%;
+}
+
+.card-stat-popover__delta .arrow {
+  color: #64748b;
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 .card-stat-popover__val .muted {
@@ -97,10 +117,11 @@
 }
 
 .card-stat-popover__val .tag {
-  margin-left: 4px;
   font-size: 10px;
   color: #86efac;
   font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .card-stat-popover__meta {
@@ -109,10 +130,4 @@
   color: #94a3b8;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
   padding-top: 8px;
-}
-
-.card-stat-popover__ability {
-  margin-top: 4px;
-  color: #cbd5e1;
-  font-weight: 600;
 }

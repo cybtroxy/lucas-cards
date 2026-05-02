@@ -1,6 +1,15 @@
 <section id="screen-select" class="screen active" aria-label="Elige tu mazo">
   <div class="bg-landscape"></div>
   <div
+    class="select-round-mob"
+    role="status"
+    aria-live="polite"
+    [attr.aria-label]="'Round ' + shopAsaltoRef()"
+  >
+    <span class="select-round-mob__label">Round</span>
+    <span class="select-round-mob__value">{{ shopAsaltoRef() }}</span>
+  </div>
+  <div
     class="select-coins-mob"
     role="status"
     aria-live="polite"
@@ -9,31 +18,12 @@
     <span class="select-coins-mob__icon" aria-hidden="true">💰</span>
     <span class="select-coins-mob__value">{{ shopCoinsLeft() }}</span>
   </div>
-  <header class="select-header">
-    <h2>Elige tu mazo</h2>
-    <p class="hint">
-      Partida <strong>{{ upcomingPartida() }}</strong> de la serie: puedes llenar hasta
-      <strong>{{ maxSlots() }} huecos</strong> (cada hueco puede acumular la misma carta para bonificar PV/ATK).
-      Solo cartas de la <strong>tienda</strong>. <span aria-hidden="true">💰</span> sirve para <strong>refrescar</strong>.
-    </p>
-    <div class="select-coins-panel" id="select-coins-panel">
-      <div class="coins-line">
-        <span class="coins-line__icon" aria-hidden="true">💰</span>
-        <span id="coins-total">{{ game().playerCoinsStart }}</span>
-      </div>
-      <div class="coins-line">
-        Gastado en refrescos: <span id="coins-spent">{{ game().shopRefreshCoinsSpent }}</span>
-        <span aria-hidden="true"> · </span>
-        Restante: <span id="coins-left">{{ shopCoinsLeft() }}</span>
-      </div>
-    </div>
-  </header>
 
   <div class="select-body">
     <div class="my-deck-section">
       <h3 class="section-title">Mis cartas</h3>
       <p class="section-hint">
-        Pulsa una carta de la <strong>tienda</strong> para añadir o apilar; pulsa un hueco lleno para quitar una copia.
+        Pulsa una carta de la <strong>tienda</strong> para añadir o apilar; pulsa un hueco lleno para <strong>retirar todo el grupo</strong> (recuperas 💰 según estrellas).
         <strong>Arrastra</strong> para reordenar huecos.
       </p>
       @if (maxSlots() > 0) {
@@ -74,10 +64,10 @@
           type="button"
           class="btn-secondary"
           id="btn-shop-refresh"
-          [disabled]="shopCoinsLeft() < 1"
+          [disabled]="shopCoinsLeft() < shopRefreshCost()"
           (click)="refreshShop()"
         >
-          Refrescar tienda <span aria-hidden="true">(−💰1)</span>
+          Refrescar tienda <span aria-hidden="true">(−💰{{ shopRefreshCost() }})</span>
         </button>
       </div>
       <div id="card-pool" class="card-pool">
@@ -97,10 +87,6 @@
       </div>
     </div>
   </div>
-
-  @if (deckFullHint(); as hint) {
-    <div class="select-deck-full-toast" role="status" aria-live="polite">{{ hint }}</div>
-  }
 
   <footer class="select-footer">
     <div class="select-footer-actions">
@@ -152,28 +138,6 @@
                     <tr>
                       <td class="ref-table__name">{{ i18n.t('type', code) }}</td>
                       <td>{{ i18n.tReferenceDesc('type', code) }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="ref-section" aria-labelledby="ref-h-abilities">
-            <h3 id="ref-h-abilities" class="ref-section__title">{{ i18n.tUi('refSectionAbilities') }}</h3>
-            <div class="ref-table-wrap">
-              <table class="ref-table ref-table--abilities">
-                <thead>
-                  <tr>
-                    <th scope="col">{{ i18n.tUi('refColName') }}</th>
-                    <th scope="col">{{ i18n.tUi('refColDesc') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (code of refOrder.ability; track code) {
-                    <tr>
-                      <td class="ref-table__name">{{ i18n.t('ability', code) }}</td>
-                      <td>{{ i18n.tReferenceDesc('ability', code) }}</td>
                     </tr>
                   }
                 </tbody>

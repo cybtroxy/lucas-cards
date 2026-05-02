@@ -1,64 +1,54 @@
-import { applySimultaneousExchange, createBattleState, resolveStrike } from './combat.engine';
+import { applySimultaneousExchange, resolveStrike } from './combat.engine';
 import type { StrikeParticipant } from './combat.engine';
-import type { Card } from '../models/card.model';
 
-function asRuntime(c: Card): StrikeParticipant {
-  return {
-    ...c,
-    currentHp: c.hp,
-    maxHp: c.hp,
-    battle: createBattleState(c.ability),
-  };
-}
-
-describe('combat.engine', () => {
-  it('applySimultaneousExchange mutates HP like double strike from same snapshot', () => {
-    const base: Card = {
-      id: 't1',
+describe('combat.engine (sin habilidades)', () => {
+  it('resolveStrike aplica multiplicador de tipo y baja PV', () => {
+    const atk: StrikeParticipant = {
+      id: 'a',
       name: 'A',
       type: 'fire',
-      ability: 'stun',
-      level: 1,
       atk: 4,
-      hp: 20,
+      hp: 5,
+      level: 1,
       art: 'x',
     };
-    const p = asRuntime(base);
-    const r = asRuntime({ ...base, id: 't2', name: 'B', type: 'water' });
-    const rng = () => 0.99;
-    const p0 = p.currentHp!;
-    const r0 = r.currentHp!;
-    applySimultaneousExchange(p, r, { rng });
-    expect(p.currentHp).toBeLessThanOrEqual(p0);
-    expect(r.currentHp).toBeLessThanOrEqual(r0);
-    expect(p.currentHp).toBeGreaterThanOrEqual(0);
-    expect(r.currentHp).toBeGreaterThanOrEqual(0);
+    const def: StrikeParticipant = {
+      id: 'b',
+      name: 'B',
+      type: 'nature',
+      atk: 2,
+      hp: 8,
+      level: 1,
+      art: 'y',
+    };
+    const r = resolveStrike(atk, def, { useCurrentHp: false, detail: null });
+    expect(r.damage).toBe(5);
+    expect(def.hp).toBe(3);
   });
 
-  it('resolveStrike respects shield block once', () => {
-    const atk: StrikeParticipant = asRuntime({
-      id: 'a',
-      name: 'Atk',
-      type: 'light',
-      ability: 'stun',
-      level: 1,
-      atk: 5,
+  it('applySimultaneousExchange resuelve ambos golpes', () => {
+    const p: StrikeParticipant = {
+      id: 'p',
+      name: 'P',
+      type: 'water',
+      atk: 3,
       hp: 10,
-      art: '⚔️',
-    });
-    const def: StrikeParticipant = asRuntime({
-      id: 'd',
-      name: 'Def',
-      type: 'energy',
-      ability: 'shield',
+      currentHp: 10,
       level: 1,
-      atk: 1,
-      hp: 10,
-      art: '🛡️',
-    });
-    const d0 = def.hp;
-    resolveStrike(atk, def, { rng: () => 0.5, detail: null });
-    expect(def.hp).toBe(d0);
-    expect(def.battle!.shieldBlocks).toBe(0);
+      art: 'a',
+    };
+    const r: StrikeParticipant = {
+      id: 'r',
+      name: 'R',
+      type: 'fire',
+      atk: 2,
+      hp: 8,
+      currentHp: 8,
+      level: 1,
+      art: 'b',
+    };
+    const ex = applySimultaneousExchange(p, r, { rng: () => 0.5 });
+    expect(ex.damageToRival).toBeGreaterThan(0);
+    expect(ex.damageToPlayer).toBeGreaterThan(0);
   });
 });

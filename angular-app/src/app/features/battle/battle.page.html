@@ -30,7 +30,12 @@
     <div class="player-badge right">
       <div class="info">
         <div class="name">Rival</div>
-        <div class="trophy">🏆 <span id="rival-trophy">{{ game().rivalTrophy }}</span></div>
+        <div class="trophy">
+          🏆 <span id="rival-trophy">{{ game().rivalTrophy }}</span>
+          @if (rivalDifficultyLabel(); as diff) {
+            <span class="rival-difficulty-hint"> ({{ diff }})</span>
+          }
+        </div>
       </div>
       <div class="avatar">🥷</div>
     </div>
