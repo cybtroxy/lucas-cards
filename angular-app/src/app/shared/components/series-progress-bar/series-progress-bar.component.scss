@@ -1,5 +1,8 @@
 :host {
   display: block;
+}
+
+.series-progress-outer {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,9 +11,18 @@
   pointer-events: none;
 }
 
+.series-progress-outer--embedded {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: auto;
+  pointer-events: auto;
+  width: 100%;
+}
+
 .series-progress {
   width: 100%;
-  /* Debajo de la barra de estado (notch / Dynamic Island): iOS reporta ~44–59px en vertical vía env(). */
   padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-bottom: 10px;
@@ -22,113 +34,143 @@
   backdrop-filter: blur(6px);
 }
 
-.series-progress__track {
+.series-progress--embedded {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 90, 120, 0.55);
+  background: linear-gradient(180deg, rgba(26, 37, 71, 0.82), rgba(13, 21, 48, 0.92));
+  border-bottom: 1px solid rgba(245, 196, 81, 0.18);
+  backdrop-filter: blur(4px);
+}
+
+.series-progress__row {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
-  max-width: 920px;
+  max-width: 520px;
   margin: 0 auto;
-  gap: 0;
 }
 
-.series-progress__connector {
-  flex: 1 1 auto;
-  min-width: 6px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(148, 163, 184, 0.22);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
-  margin: 0 2px;
+.series-progress--embedded .series-progress__row {
+  max-width: none;
 }
 
-.series-progress__connector--ahead {
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.45), rgba(59, 130, 246, 0.35));
-}
-
-.series-progress__chip {
+.series-progress__tick {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: rgba(226, 232, 240, 0.88);
+  min-width: 1.25em;
+  text-align: center;
+}
+
+.series-progress__endcap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.series-progress__bar-host {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  min-height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.series-progress__bar-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.series-progress__bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #16a34a, #22c55e, #4ade80);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+  transition: width 0.35s ease;
+}
+
+.series-progress__strikes {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.series-progress__strike-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   box-sizing: border-box;
-  border: 3px double rgba(255, 255, 255, 0.28);
-  background: transparent;
+  border: 2px solid rgba(100, 116, 139, 0.42);
+  background: rgba(15, 23, 42, 0.55);
   box-shadow:
-    inset 0 3px 5px rgba(255, 255, 255, 0.12),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.45),
-    0 2px 6px rgba(0, 0, 0, 0.35);
-  color: rgba(226, 232, 240, 0.85);
-  font-family: 'Cinzel', serif;
-  font-weight: 800;
-  font-size: 12px;
+    inset 0 2px 4px rgba(255, 255, 255, 0.06),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.35);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.series-progress__chip[data-state='pending'] {
-  background: rgba(15, 23, 42, 0.25);
-  color: rgba(226, 232, 240, 0.75);
+.series-progress__strike-chip--on {
+  border-color: rgba(252, 165, 165, 0.75);
+  background: linear-gradient(160deg, #dc2626, #7f1d1d);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 12px rgba(239, 68, 68, 0.55);
 }
 
-.series-progress__chip[data-state='win'] {
-  background: linear-gradient(145deg, #22c55e, #15803d);
-  color: #f0fdf4;
-  border-color: rgba(187, 247, 208, 0.55);
+.series-progress__strike {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(71, 85, 105, 0.55);
+  text-shadow: none;
+  transition: color 0.25s ease;
 }
 
-.series-progress__chip[data-state='loss'] {
-  background: linear-gradient(145deg, #ef4444, #991b1b);
+.series-progress__strike-chip--on .series-progress__strike {
   color: #fef2f2;
-  border-color: rgba(252, 165, 165, 0.55);
-}
-
-.series-progress__chip[data-state='draw'] {
-  background: linear-gradient(145deg, #3f3f46, #18181b);
-  color: #d4d4d8;
-  border-color: rgba(161, 161, 170, 0.45);
-}
-
-/* Partida actual: pulso dorado */
-.series-progress__chip--current {
-  position: relative;
-  z-index: 1;
-  border-color: rgba(245, 196, 81, 0.75);
-  animation: series-progress-chip-glow 2s ease-in-out infinite;
-}
-
-@keyframes series-progress-chip-glow {
-  0%,
-  100% {
-    box-shadow:
-      inset 0 3px 5px rgba(255, 255, 255, 0.12),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.45),
-      0 2px 6px rgba(0, 0, 0, 0.35),
-      0 0 0 0 rgba(245, 196, 81, 0),
-      0 0 0 0 rgba(245, 196, 81, 0);
-  }
-  50% {
-    box-shadow:
-      inset 0 3px 5px rgba(255, 255, 255, 0.14),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.45),
-      0 2px 10px rgba(0, 0, 0, 0.45),
-      0 0 14px 3px rgba(245, 196, 81, 0.65),
-      0 0 26px 8px rgba(245, 196, 81, 0.28);
-  }
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .series-progress__chip--current {
-    animation: none;
-    box-shadow:
-      inset 0 3px 5px rgba(255, 255, 255, 0.12),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.45),
-      0 2px 8px rgba(0, 0, 0, 0.4),
-      0 0 12px 2px rgba(245, 196, 81, 0.45);
+  .series-progress__bar-fill {
+    transition: none;
   }
-}
 
-.series-progress__num {
-  line-height: 1;
-  pointer-events: none;
+  .series-progress__strike-chip {
+    transition: none;
+  }
+
+  .series-progress__strike {
+    transition: none;
+  }
 }

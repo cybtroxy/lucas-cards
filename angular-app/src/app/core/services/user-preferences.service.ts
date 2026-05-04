@@ -6,8 +6,8 @@ const STORAGE_KEY = 'lucasCardsBattleUiPrefs';
 /** Preferencias de interfaz de batalla persistidas entre partidas y recargas. */
 export interface BattleUiPreferences {
   combatZoom: 1 | 2 | 3;
-  /** Velocidad ×1/×2/×3 cuando AUTO está desactivado. */
-  battleSpeed: 1 | 2 | 3;
+  /** Velocidad ×1/×2/×3/×5 cuando AUTO está desactivado. */
+  battleSpeed: 1 | 2 | 3 | 5;
   battleAuto: boolean;
 }
 
@@ -17,8 +17,8 @@ const DEFAULT_BATTLE_UI: BattleUiPreferences = {
   battleAuto: false,
 };
 
-function clampSpeed(n: number): 1 | 2 | 3 {
-  if (n === 2 || n === 3) return n;
+function clampSpeed(n: number): 1 | 2 | 3 | 5 {
+  if (n === 2 || n === 3 || n === 5) return n;
   return 1;
 }
 

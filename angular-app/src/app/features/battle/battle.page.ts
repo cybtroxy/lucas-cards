@@ -2,7 +2,7 @@ import { afterNextRender, Component, computed, DestroyRef, inject } from '@angul
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AudioSettingsFabComponent } from '../../shared/components/audio-settings-fab/audio-settings-fab.component';
 import { CardComponent } from '../../shared/components/card/card.component';
-import { COMBAT_ZOOM_SCALE, WINS_TO_WIN_SERIES } from '../../core/engine/game-rules';
+import { COMBAT_ZOOM_SCALE } from '../../core/engine/game-rules';
 import { combatLogEntriesToHtml } from '../../core/engine/combat-log.format';
 import { GameStateService } from '../../core/services/game-state.service';
 import { I18nService } from '../../core/services/i18n.service';
@@ -95,7 +95,7 @@ export class BattlePageComponent {
           gs.setCombatZoom(1, false);
           const g = gs.game();
           if (g.auto) gs.toggleAuto();
-          else if (g.speed === 2) gs.setSpeed(1, false);
+          else if (g.speed === 2 || g.speed === 5) gs.setSpeed(1, false);
         }
       };
       applyMobileZoom(mq.matches);
@@ -150,6 +150,4 @@ export class BattlePageComponent {
   endTurnQuick(): void {
     this.gs.endBattleQuick();
   }
-
-  protected readonly winsSeries = WINS_TO_WIN_SERIES;
 }

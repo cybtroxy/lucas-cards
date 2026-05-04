@@ -34,7 +34,8 @@ import {
   rivalShopBudgetForPartida,
   SHOP_REFRESH_COST,
   stackStatsFromCopies,
-  WINS_TO_WIN_SERIES,
+  SERIES_PARTIDA_LOSSES_TO_ELIMINATE,
+  SERIES_PARTIDA_WINS_TO_CLINCH,
 } from '../engine/game-rules';
 import { simulateRivalDeckSelection } from '../engine/rival-deck-selection';
 import { nowMs } from '../engine/game-utils';
@@ -321,15 +322,15 @@ export class GameStateService {
     setTimeout(() => void this.runTurnLoop(), 900);
   }
 
-  /** x1 / x2 / x3: desactiva AUTO (comportamiento vanilla). */
+  /** ×1 / ×2 / ×3 / ×5: desactiva AUTO. */
   setSpeed(s: number, persist: boolean = true): void {
     this.setGame((g) => {
       if (s !== 0) g.auto = false;
       g.speed = s;
       g.paused = s === 0;
     });
-    if (persist && s >= 1 && s <= 3) {
-      this.userPrefs.patchBattleUi({ battleSpeed: s as 1 | 2 | 3, battleAuto: false });
+    if (persist && (s === 1 || s === 2 || s === 3 || s === 5)) {
+      this.userPrefs.patchBattleUi({ battleSpeed: s as 1 | 2 | 3 | 5, battleAuto: false });
     }
   }
 
@@ -361,7 +362,7 @@ export class GameStateService {
     const g = this._game();
     this.userPrefs.patchBattleUi({
       battleAuto: g.auto,
-      battleSpeed: g.auto ? 3 : (g.speed as 1 | 2 | 3),
+      battleSpeed: g.auto ? 3 : (g.speed as 1 | 2 | 3 | 5),
     });
   }
 
@@ -657,7 +658,9 @@ export class GameStateService {
       seriesWinsR,
     });
 
-    const seriesOver = seriesWinsP >= WINS_TO_WIN_SERIES || seriesWinsR >= WINS_TO_WIN_SERIES;
+    const seriesOver =
+      seriesWinsP >= SERIES_PARTIDA_WINS_TO_CLINCH ||
+      seriesWinsR >= SERIES_PARTIDA_LOSSES_TO_ELIMINATE;
     const isDraw = winner === 'draw';
     const isWin = winner === 'player';
 
@@ -671,7 +674,7 @@ export class GameStateService {
     if (isDraw) {
       emoji = '🤝';
       title = 'Empate en la partida';
-      subtitle = `Ninguno suma victoria en la serie. Monedas: arrastre + ${3 * SHOP_REFRESH_COST} 💰 (3× refresco fijo ${SHOP_REFRESH_COST}), sin extra por empate. Total tú: ${ensured.coinsForPlayer}. Gloria +${glory.gainedP}.`;
+      subtitle = `Ninguno suma victoria en la serie; el empate no cuenta como derrota. Pasáis a la siguiente partida. Monedas: arrastre + ${3 * SHOP_REFRESH_COST} 💰 (3× refresco fijo ${SHOP_REFRESH_COST}), sin extra por empate. Total tú: ${ensured.coinsForPlayer}. Gloria +${glory.gainedP}.`;
     } else if (isWin) {
       emoji = '🏆';
       title = '¡Ganaste la partida!';
@@ -684,13 +687,13 @@ export class GameStateService {
 
     let seriesNote = '';
     if (seriesOver) {
-      if (seriesWinsP >= WINS_TO_WIN_SERIES) {
-        seriesNote = `Serie final: ${seriesWinsP} - ${seriesWinsR}. ¡Ganaste la serie al mejor de 9 (extensible)!`;
+      if (seriesWinsP >= SERIES_PARTIDA_WINS_TO_CLINCH) {
+        seriesNote = `Serie final: ${seriesWinsP} victorias, ${seriesWinsR} derrotas. ¡Ganaste la serie (${SERIES_PARTIDA_WINS_TO_CLINCH} victorias de partida)!`;
       } else {
-        seriesNote = `Serie final: ${seriesWinsP} - ${seriesWinsR}. El rival gana la serie.`;
+        seriesNote = `Serie final: ${seriesWinsP} victorias, ${seriesWinsR} derrotas. El rival gana la serie (${SERIES_PARTIDA_LOSSES_TO_ELIMINATE} derrotas de partida).`;
       }
     } else {
-      seriesNote = `Serie: ${seriesWinsP} - ${seriesWinsR} (primeros a ${WINS_TO_WIN_SERIES} victorias; partida ${gamesInSeries} · BO9+). Próx. 💰 tú: ${ensured.coinsForPlayer} · rival: ${ensured.coinsForRival}`;
+      seriesNote = `Serie: ${seriesWinsP}/${SERIES_PARTIDA_WINS_TO_CLINCH} victorias · ${seriesWinsR}/${SERIES_PARTIDA_LOSSES_TO_ELIMINATE} derrotas máx. · partida ${gamesInSeries}. Próx. 💰 tú: ${ensured.coinsForPlayer} · rival: ${ensured.coinsForRival}`;
     }
 
     const survivorsP = snap.playerDeck.filter((c) => c.alive).length;

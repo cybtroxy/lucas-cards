@@ -1,6 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { booleanAttribute, Component, computed, inject, input } from '@angular/core';
 import { GameStateService } from '../../../core/services/game-state.service';
-import { seriesProgressCircleCount, WINS_TO_WIN_SERIES } from '../../../core/engine/game-rules';
+import {
+  SERIES_PARTIDA_LOSSES_TO_ELIMINATE,
+  SERIES_PARTIDA_WINS_TO_CLINCH,
+} from '../../../core/engine/game-rules';
+import { I18nService } from '../../../core/services/i18n.service';
+
 @Component({
   selector: 'app-series-progress-bar',
   standalone: true,
@@ -9,49 +14,30 @@ import { seriesProgressCircleCount, WINS_TO_WIN_SERIES } from '../../../core/eng
 })
 export class SeriesProgressBarComponent {
   readonly gs = inject(GameStateService);
+  readonly i18n = inject(I18nService);
   readonly game = this.gs.game;
 
-  readonly circleCount = computed(() => {
-    const g = this.game();
-    const decided =
-      g.seriesWinsP >= WINS_TO_WIN_SERIES || g.seriesWinsR >= WINS_TO_WIN_SERIES;
-    return seriesProgressCircleCount({
-      partidasCompletadas: g.seriesPartidaOutcomes.length,
-      seriesDecided: decided,
-    });
+  /** Si es true, la barra va en flujo normal (p. ej. dentro del modal de resultado), no fija al viewport. */
+  readonly embedded = input(false, { transform: booleanAttribute });
+
+  readonly strikeIndices = [0, 1, 2] as const;
+
+  /** Porcentaje de la barra verde hacia 10 victorias de partida (empates no suman). */
+  readonly winsFillPercent = computed(() => {
+    const w = this.game().seriesWinsP;
+    const pct = (w / SERIES_PARTIDA_WINS_TO_CLINCH) * 100;
+    return Math.min(100, Math.max(0, pct));
   });
 
-  readonly indices = computed(() =>
-    Array.from({ length: this.circleCount() }, (_, i) => i),
-  );
+  strikeLit(index: number): boolean {
+    return this.game().seriesWinsR > index;
+  }
 
-  /** Índice 0-based del círculo de la partida en curso (siguiente sin resultado). */
-  readonly currentPartidaIndex = computed(() => {
+  readonly progressAria = computed(() => {
     const g = this.game();
-    const decided =
-      g.seriesWinsP >= WINS_TO_WIN_SERIES || g.seriesWinsR >= WINS_TO_WIN_SERIES;
-    if (decided) return -1;
-    const n = seriesProgressCircleCount({
-      partidasCompletadas: g.seriesPartidaOutcomes.length,
-      seriesDecided: decided,
-    });
-    const next = g.seriesPartidaOutcomes.length;
-    return next < n ? next : -1;
+    if (this.i18n.isEn()) {
+      return `Series: ${g.seriesWinsP} of ${SERIES_PARTIDA_WINS_TO_CLINCH} wins, ${g.seriesWinsR} of ${SERIES_PARTIDA_LOSSES_TO_ELIMINATE} match losses.`;
+    }
+    return `Serie: ${g.seriesWinsP} de ${SERIES_PARTIDA_WINS_TO_CLINCH} victorias, ${g.seriesWinsR} de ${SERIES_PARTIDA_LOSSES_TO_ELIMINATE} derrotas de partida.`;
   });
-
-  chipState(index: number): 'pending' | 'win' | 'loss' | 'draw' {
-    const g = this.game();
-    const o = g.seriesPartidaOutcomes[index];
-    if (o === undefined) return 'pending';
-    if (o === 'player') return 'win';
-    if (o === 'rival') return 'loss';
-    return 'draw';
-  }
-
-  lineTint(prevIndex: number): 'muted' | 'ahead' {
-    const a = this.chipState(prevIndex);
-    const b = this.chipState(prevIndex + 1);
-    if (a === 'pending' && b === 'pending') return 'muted';
-    return 'ahead';
-  }
 }

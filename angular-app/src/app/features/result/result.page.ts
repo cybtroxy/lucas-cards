@@ -2,10 +2,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { GameStateService } from '../../core/services/game-state.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { SeriesProgressBarComponent } from '../../shared/components/series-progress-bar/series-progress-bar.component';
 
 @Component({
   selector: 'app-result-page',
   standalone: true,
+  imports: [SeriesProgressBarComponent],
   templateUrl: './result.page.html',
   styleUrl: './result.page.scss',
 })

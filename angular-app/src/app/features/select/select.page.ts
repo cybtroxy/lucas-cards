@@ -70,7 +70,8 @@ export class SelectPageComponent implements OnInit, OnDestroy {
   readonly shopHint = computed(() => {
     const partida = this.gs.game().shopAsaltoForNextSelect;
     const r = shopLevelRangeFromPartida(partida);
-    return `Partida ${partida} de la serie: la tienda solo incluye cartas de nivel ${r.min}–${r.max}. ${SHOP_OFFER_COUNT} casillas; la misma carta puede repetirse hasta ${SHOP_MAX_SAME_CARD} veces. Al elegir una, su hueco queda vacío hasta refrescar.`;
+    const slots = this.maxSlots();
+    return `Partida ${partida} de la serie: la tienda solo incluye cartas de nivel ${r.min}–${r.max}. Mazo: hasta ${slots} hueco(s) (empiezas con 3; +1 cada 2 partidas; máx. 6). ${SHOP_OFFER_COUNT} casillas en tienda; la misma carta puede repetirse hasta ${SHOP_MAX_SAME_CARD} veces. Al elegir una, su hueco queda vacío hasta refrescar.`;
   });
 
   readonly shopCoinsLeft = computed(() => this.gs.selectShopCoinsLeft());

@@ -2,7 +2,7 @@
 
 Juego de cartas por turnos con **combate simultáneo** por asalto. Este repositorio contiene la **SPA en Angular 18** (`angular-app/`): aplicación **standalone**, **sin NgModules**, con **rutas perezosas** (`loadComponent`) y estado reactivo centrado en **`GameStateService`**.
 
-La serie es al **mejor de 9 partidas posibles** en la barra de progreso; la serie la gana quien alcance **5 victorias** primero (`WINS_TO_WIN_SERIES`). Puede haber empates en partida y la serie puede alargarse.
+La serie la ganas con **10 victorias de partida** (duelos completos), `SERIES_PARTIDA_WINS_TO_CLINCH` en `game-rules.ts`. Pierdes la serie si acumulas **3 derrotas de partida** (`SERIES_PARTIDA_LOSSES_TO_ELIMINATE`). Un **empate de partida** no suma derrota: se pasa a la siguiente partida. La barra de progreso muestra cada partida; las derrotas se marcan con **×** (hasta tres).
 
 ## Origen e intención del proyecto
 
@@ -19,6 +19,8 @@ Esperamos que lo disfruten y que **niños y niñas** en casa se diviertan. La id
 ### English
 
 The original idea for the game came from **Lucas**, a child under 10. The mechanics were chosen so he could **understand them easily**—hence the name: literally **Lucas’s Cards**.
+
+A **series** is won with **10 match wins** (`SERIES_PARTIDA_WINS_TO_CLINCH`) and lost after **3 match losses** (`SERIES_PARTIDA_LOSSES_TO_ELIMINATE`). A **drawn match** does not count as a loss; play advances to the next match.
 
 There have been **adaptations**, and more may follow. The goal is to **bring the game to phones and tablets**; the **first release is on the web**. The game may well **not be balanced**: there is **no promise** it will ever be perfectly balanced. It is **not** designed around **pay-to-win**, but there **is** interest in **earning revenue** if the project **grows**. **Pull requests** are welcome.
 
@@ -69,7 +71,7 @@ La URL por defecto redirige a **`/menu`**. No hay en la raíz del repo la antigu
 
 - **Nivel de carta** (`level` 1–5 en datos): filtra la **tienda** según el **asalto de referencia** (`shopAsaltoForNextSelect` / `shopLevelRangeFromAsalto`). No hay campo `cost` por carta.
 - **Monedas (💰 en UI)** entre partidas: base mínima **`MIN_BASE_COINS_PER_PARTIDA` (10)** + **arrastre** (saldo al **inicio** de la batalla de esa partida, ya descontados los refrescos de tienda de la **selección** de esa partida) + **bono Fibonacci** **1, 2, 3, 5, 8, 13** según partidas ya completadas en la serie. En selección sirven sobre todo para **refrescar la tienda** (coste `SHOP_REFRESH_COST`).
-- **Mazo en selección**: no es solo “hasta 10 cartas”: hay **huecos** (`DeckSlot`) con un máximo según la **partida** (**3–7** huecos, `maxSelectableSlotsForPartida`). En cada hueco puedes **apilar** la misma carta hasta **`MAX_COPIES_PER_DECK_SLOT_STACK` (3)**; al superar el toque en un hueco, una copia igual puede abrir **otro hueco** si cabe. Las **estrellas** (1★ / 2★) reflejan copias y bonifican PV/ATK (`stackStatsFromCopies` en `game-rules.ts`).
+- **Mazo en selección**: **huecos** (`DeckSlot`) con máximo según la **partida** (**3 al inicio**, **+1 cada 2 partidas** de serie gane o pierdas, tope **6**, `maxSelectableSlotsForPartida`). El rival usa el mismo tope. En cada hueco puedes **apilar** la misma carta hasta **`MAX_COPIES_PER_DECK_SLOT_STACK` (3)**; al superar el toque en un hueco, una copia igual puede abrir **otro hueco** si cabe. Las **estrellas** (1★ / 2★) reflejan copias y bonifican PV/ATK (`stackStatsFromCopies` en `game-rules.ts`). La pantalla de **resultado** incluye la misma **barra de progreso de serie** (0–10 victorias y derrotas ×) que en selección.
 - **Tienda**: **`SHOP_OFFER_COUNT`** casillas fijas; al elegir una oferta la casilla queda vacía hasta refresco; misma carta puede repetirse en la rejilla hasta **`SHOP_MAX_SAME_CARD`**. La UI puede resaltar ofertas **apilables** sobre tu mazo actual.
 - **Selección**: **Angular CDK Drag-Drop** para reordenar huecos del mazo; tienda por clics en ofertas.
 - **Combate**: ataques **simultáneos** por asalto; tipos elementales y habilidades en **`combat.engine.ts`**; UI de animaciones (`battleUi`: golpes, curaciones, K.O. con retirada animada). Límite de seguridad de asaltos: **`MAX_DUEL_ASALTOS`**.
@@ -83,7 +85,7 @@ El daño usa el campo **`type`** de cada carta. La tabla de ventajas y el multip
 ## Personalización rápida
 
 - **Nuevas cartas**: edita **`angular-app/src/app/core/data/cards.json`** (y el modelo **`card.model.ts`** si añades campos). `cards.catalog.ts` reexporta el array tipado.
-- **Economía / tienda / serie / apilamiento**: **`core/engine/game-rules.ts`**.
+- **Economía / tienda / serie (10 victorias / 3 derrotas de partida) / apilamiento**: **`core/engine/game-rules.ts`**.
 - **Combate y habilidades**: **`core/engine/combat.engine.ts`**.
 - **Flujo de partida y persistencia del mazo entre partidas**: **`core/services/game-state.service.ts`**.
 - **Estilos globales de cartas, batalla y selección**: **`angular-app/src/lucas-cards.scss`**.

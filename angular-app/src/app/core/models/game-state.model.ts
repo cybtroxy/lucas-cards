@@ -35,8 +35,14 @@ export interface GameState {
   endedReason: BattleWinner | null;
   log: string[];
 
+  /** Victorias de partida (duelo) del jugador en la serie actual. */
   seriesWinsP: number;
+  /**
+   * Derrotas de partida del jugador (victorias de partida del rival).
+   * No aumenta con empates de partida. Si llega a `SERIES_PARTIDA_LOSSES_TO_ELIMINATE`, el rival gana la serie.
+   */
   seriesWinsR: number;
+  /** Partidas de serie ya jugadas (incluye empates). */
   gamesInSeries: number;
 
   coinsForPlayer: number;
@@ -53,7 +59,7 @@ export interface GameState {
 
   /** Mazo guardado al iniciar la última partida (reconstruye huecos al volver a selección). */
   lastPartidaDeckSlots: PersistedDeckSlot[];
-  /** Resultado de cada partida de la serie actual (orden cronológico). */
+  /** Resultado de cada partida de la serie actual (orden cronológico): victoria jugador, rival o empate. */
   seriesPartidaOutcomes: BattleWinner[];
 
   combatCardZoom: 1 | 2 | 3;

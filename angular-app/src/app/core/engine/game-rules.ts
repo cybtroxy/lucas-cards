@@ -38,33 +38,25 @@ export function rivalShopBudgetForPartida(
   return { ...roll, budget };
 }
 
-export const MAX_DECK = 10;
+/** Tope de huecos de mazo (jugador y rival); crece con la serie hasta este máximo. */
+export const MAX_DECK = 6;
 export const MIN_DECK = 1;
-export const WINS_TO_WIN_SERIES = 5;
 
-/** Partidas 1–3: 3 huecos; 4→4; 5→5; 6→6; 7+→7. */
+/** Victorias de **partida** (duelo completo) que el jugador necesita para ganar la serie. */
+export const SERIES_PARTIDA_WINS_TO_CLINCH = 10;
+/**
+ * Derrotas de **partida** del jugador (victorias de partida del rival) que eliminan al jugador de la serie.
+ * Los empates de partida no incrementan este contador.
+ */
+export const SERIES_PARTIDA_LOSSES_TO_ELIMINATE = 3;
+
+/**
+ * Huecos de mazo en selección: **3** en las partidas 1–2; +1 cada **2** partidas de serie
+ * (gane o pierdas); tope **6**. Misma regla para el rival (`pickRivalDeckBase` / simulación).
+ */
 export function maxSelectableSlotsForPartida(partidaNumber: number): number {
-  const n = Math.max(1, Math.floor(partidaNumber));
-  if (n <= 3) return 3;
-  if (n === 4) return 4;
-  if (n === 5) return 5;
-  if (n === 6) return 6;
-  return 7;
-}
-
-/** Círculos en la barra de serie: 9 hasta que haya 9 partidas sin ganador de serie; luego crece. */
-export function seriesProgressCircleCount(input: {
-  partidasCompletadas: number;
-  seriesDecided: boolean;
-}): number {
-  const { partidasCompletadas, seriesDecided } = input;
-  if (seriesDecided) {
-    return Math.max(9, partidasCompletadas);
-  }
-  if (partidasCompletadas >= 9) {
-    return Math.max(9, partidasCompletadas + 1);
-  }
-  return 9;
+  const p = Math.max(1, Math.floor(partidaNumber));
+  return Math.min(MAX_DECK, 3 + Math.floor((p - 1) / 2));
 }
 
 /** Stats efectivos por copias apiladas (1★: +30% PV; 2★: +50%; 3★: +70% PV y ATK). Redondeo hacia abajo; si el bono queda en 0, +1 mínimo en ese stat. */
@@ -275,7 +267,8 @@ export function awardGloryAfterPartida(input: {
   seriesWinsR: number;
 }): { gainedP: number; gainedR: number } {
   const seriesOver =
-    input.seriesWinsP >= WINS_TO_WIN_SERIES || input.seriesWinsR >= WINS_TO_WIN_SERIES;
+    input.seriesWinsP >= SERIES_PARTIDA_WINS_TO_CLINCH ||
+    input.seriesWinsR >= SERIES_PARTIDA_LOSSES_TO_ELIMINATE;
   let p = GLORY_PARTICIPATE;
   let r = GLORY_PARTICIPATE;
   if (input.winner === 'player') {
@@ -289,8 +282,8 @@ export function awardGloryAfterPartida(input: {
     r += GLORY_DRAW;
   }
   if (seriesOver) {
-    if (input.seriesWinsP >= WINS_TO_WIN_SERIES) p += GLORY_SERIES_BONUS;
-    if (input.seriesWinsR >= WINS_TO_WIN_SERIES) r += GLORY_SERIES_BONUS;
+    if (input.seriesWinsP >= SERIES_PARTIDA_WINS_TO_CLINCH) p += GLORY_SERIES_BONUS;
+    if (input.seriesWinsR >= SERIES_PARTIDA_LOSSES_TO_ELIMINATE) r += GLORY_SERIES_BONUS;
   }
   return { gainedP: p, gainedR: r };
 }

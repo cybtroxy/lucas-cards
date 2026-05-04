@@ -1,26 +1,33 @@
-<div class="series-progress" aria-label="Progreso de la serie">
-  <div class="series-progress__track">
-    @for (idx of indices(); track idx) {
-      @if (idx > 0) {
-        <div class="series-progress__connector" [class.series-progress__connector--ahead]="lineTint(idx - 1) === 'ahead'"></div>
-      }
-      <div
-        class="series-progress__chip"
-        [class.series-progress__chip--current]="idx === currentPartidaIndex()"
-        [attr.data-state]="chipState(idx)"
-        [attr.aria-current]="idx === currentPartidaIndex() ? 'step' : null"
-        [title]="
-          chipState(idx) === 'win'
-            ? 'Ganada'
-            : chipState(idx) === 'loss'
-              ? 'Perdida'
-              : chipState(idx) === 'draw'
-                ? 'Empate'
-                : 'Pendiente'
-        "
-      >
-        <span class="series-progress__num">{{ idx + 1 }}</span>
+<div
+  class="series-progress-outer"
+  [class.series-progress-outer--embedded]="embedded()"
+>
+  <div
+    class="series-progress"
+    [class.series-progress--embedded]="embedded()"
+    role="region"
+    [attr.aria-label]="progressAria()"
+  >
+    <div class="series-progress__row">
+      <span class="series-progress__tick" aria-hidden="true">0</span>
+      <div class="series-progress__bar-host">
+        <div class="series-progress__bar-bg" aria-hidden="true">
+          <div class="series-progress__bar-fill" [style.width.%]="winsFillPercent()"></div>
+        </div>
       </div>
-    }
+      <div class="series-progress__endcap">
+        <span class="series-progress__tick" aria-hidden="true">10</span>
+        <div class="series-progress__strikes" aria-hidden="true">
+          @for (i of strikeIndices; track i) {
+            <span
+              class="series-progress__strike-chip"
+              [class.series-progress__strike-chip--on]="strikeLit(i)"
+            >
+              <span class="series-progress__strike">×</span>
+            </span>
+          }
+        </div>
+      </div>
+    </div>
   </div>
 </div>

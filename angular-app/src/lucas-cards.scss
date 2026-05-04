@@ -376,16 +376,6 @@ app-result-page {
   line-height: 1;
 }
 
-.series-line {
-  font-size: 12px;
-  color: var(--ink-dim);
-  margin-bottom: 4px;
-  text-align: center;
-  max-width: 100%;
-}
-#series-you { color: var(--player); font-weight: 700; }
-#series-rival { color: #f87171; font-weight: 700; }
-
 .result-series-note { font-size: 15px; color: var(--gold); margin: 0 0 16px; min-height: 1.2em; }
 .result-actions { flex-wrap: wrap; }
 .hidden { display: none !important; }
@@ -1658,6 +1648,7 @@ app-card {
   color: var(--gold);
   text-shadow: 0 2px 0 #5a3a06;
 }
+
 .result-wrap p { color: var(--ink-dim); margin: 0 0 20px; }
 .result-combat-detail-panel[hidden] {
   display: none !important;
@@ -1919,7 +1910,6 @@ app-card {
     padding-left: 0;
     padding-right: 0;
   }
-  .round-pill .series-line,
   .round-pill .ronda-progress {
     display: none;
   }
@@ -1951,15 +1941,18 @@ app-card {
     display: none;
   }
   .speed-btn[data-speed="1"] .speed-btn-mob,
-  .speed-btn[data-speed="3"] .speed-btn-mob {
+  .speed-btn[data-speed="3"] .speed-btn-mob,
+  .speed-btn[data-speed="5"] .speed-btn-mob {
     display: inline;
   }
   .speed-btn[data-speed="1"] .speed-btn-desk,
-  .speed-btn[data-speed="3"] .speed-btn-desk {
+  .speed-btn[data-speed="3"] .speed-btn-desk,
+  .speed-btn[data-speed="5"] .speed-btn-desk {
     display: none;
   }
   .speed-btn[data-speed="1"],
-  .speed-btn[data-speed="3"] {
+  .speed-btn[data-speed="3"],
+  .speed-btn[data-speed="5"] {
     padding: 8px 12px;
     min-width: 44px;
   }
