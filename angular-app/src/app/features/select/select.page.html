@@ -36,16 +36,25 @@
           aria-label="Mis cartas"
         >
           @for (slot of game().deckSlots; track slot.uid) {
-            <div cdkDrag class="card-drag-wrap">
-              <app-card
-                [card]="slotViewCard(slot)"
-                side="player"
-                extraClass="card--in-my-deck"
-                [stackStars]="slotStars(slot)"
-                [statPopoverBase]="slotStatBase(slot)"
-                (cardClick)="onDeckSlotClick(slot)"
-              />
-            </div>
+            @if (isEmptyDeckSlot(slot)) {
+              <div cdkDrag class="card-drag-wrap card-drag-wrap--empty-deck-slot">
+                <div class="deck-slot-placeholder" aria-hidden="true">
+                  <span class="deck-slot-placeholder__dashed"></span>
+                  <span class="deck-slot-placeholder__label">Vacío</span>
+                </div>
+              </div>
+            } @else {
+              <div cdkDrag class="card-drag-wrap">
+                <app-card
+                  [card]="slotViewCard(slot)"
+                  side="player"
+                  extraClass="card--in-my-deck"
+                  [stackStars]="slotStars(slot)"
+                  [statPopoverBase]="slotStatBase(slot)"
+                  (cardClick)="onDeckSlotClick(slot)"
+                />
+              </div>
+            }
           }
           @for (p of placeholderSlots(); track p) {
             <div class="deck-slot-placeholder" aria-hidden="true">

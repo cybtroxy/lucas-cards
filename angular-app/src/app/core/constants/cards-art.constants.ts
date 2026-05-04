@@ -23,3 +23,12 @@ export function cardsArtImageSrc(
   if (!file) return null;
   return `${CARDS_ART_BASE_PATH}/${cardsArtFolderForLevel(level)}/${file}`;
 }
+
+/** Marco decorativo PNG (centro transparente) por nivel: `border/border-{1..5}.png`. */
+export function cardsBorderImageSrc(level: number): string {
+  const lv = Math.min(5, Math.max(1, level || 1));
+  return `${CARDS_ART_BASE_PATH}/border/border-${lv}.png`;
+}
+
+/** Icono “curiosidad” en la carta para abrir el popover de estadísticas. */
+export const CARDS_STATS_LUPA_SRC = `${CARDS_ART_BASE_PATH}/border/lupa.png`;

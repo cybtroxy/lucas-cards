@@ -23,7 +23,11 @@ import {
   stackStatsFromCopies,
 } from '../../core/engine/game-rules';
 import type { Card } from '../../core/models/card.model';
-import type { DeckSlot } from '../../core/models/deck-slot.model';
+import {
+  isEmptyDeckSlot,
+  isFilledDeckSlot,
+  type FilledDeckSlot,
+} from '../../core/models/deck-slot.model';
 import type { ShopOfferSlot } from '../../core/models/game-state.model';
 
 @Component({
@@ -81,21 +85,24 @@ export class SelectPageComponent implements OnInit, OnDestroy {
 
   readonly canStart = computed(() => this.gs.canStartBattle());
 
+  readonly isEmptyDeckSlot = isEmptyDeckSlot;
+  readonly isFilledDeckSlot = isFilledDeckSlot;
+
   /** Número de partida de la serie según el que se filtra la tienda (coincide con el hint). */
   readonly shopAsaltoRef = computed(() => this.game().shopAsaltoForNextSelect);
 
-  slotViewCard(slot: DeckSlot): Card {
+  slotViewCard(slot: FilledDeckSlot): Card {
     const raw = this.catalog.findById(slot.id)!;
     const st = stackStatsFromCopies(slot.copies, raw.hp, raw.atk);
     return { ...raw, hp: st.hp, atk: st.atk };
   }
 
-  slotStatBase(slot: DeckSlot): { hp: number; atk: number } {
+  slotStatBase(slot: FilledDeckSlot): { hp: number; atk: number } {
     const raw = this.catalog.findById(slot.id)!;
     return { hp: raw.hp, atk: raw.atk };
   }
 
-  slotStars(slot: DeckSlot): 0 | 1 | 2 | 3 {
+  slotStars(slot: FilledDeckSlot): 0 | 1 | 2 | 3 {
     const raw = this.catalog.findById(slot.id)!;
     return stackStatsFromCopies(slot.copies, raw.hp, raw.atk).stars;
   }
@@ -103,7 +110,7 @@ export class SelectPageComponent implements OnInit, OnDestroy {
   /** Oferta de tienda apilable sobre un hueco del mazo (misma carta y aún se puede añadir). */
   shopOfferIsDeckUpgrade(card: Card): boolean {
     const g = this.game();
-    if (!g.deckSlots.some((s) => s.id === card.id)) return false;
+    if (!g.deckSlots.some((s) => isFilledDeckSlot(s) && s.id === card.id)) return false;
     return this.gs.canAddCard(card);
   }
 
@@ -122,7 +129,7 @@ export class SelectPageComponent implements OnInit, OnDestroy {
     this.sound.play(SoundCue.ShopPick);
   }
 
-  onDeckSlotClick(slot: DeckSlot): void {
+  onDeckSlotClick(slot: FilledDeckSlot): void {
     this.gs.removeDeckSlot(slot.uid);
   }
 

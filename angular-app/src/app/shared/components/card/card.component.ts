@@ -11,7 +11,11 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { cardsArtImageSrc } from '../../../core/constants/cards-art.constants';
+import {
+  CARDS_STATS_LUPA_SRC,
+  cardsArtImageSrc,
+  cardsBorderImageSrc,
+} from '../../../core/constants/cards-art.constants';
 import type { BattleCard } from '../../../core/models/battle-card.model';
 import type { Card } from '../../../core/models/card.model';
 import { CardStatPopoverCoordinator } from './card-stat-popover.coordinator';
@@ -57,11 +61,50 @@ export class CardComponent implements OnDestroy {
 
   /** Cierra este popover y libera el coordinador (también se usa para cerrar otros al abrir uno nuevo). */
   private readonly dismissPopover = (): void => {
+    this.unbindGlobalDismiss();
     this.restorePopoverToHost();
     this.popoverVisible.set(false);
     this.popoverStyle.set(this.hiddenPopoverStyle());
     this.popoverCoordinator.release(this.dismissPopover);
   };
+
+  private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
+  private escapeKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  private unbindGlobalDismiss(): void {
+    if (this.outsideClickHandler) {
+      this.doc.removeEventListener('click', this.outsideClickHandler, true);
+      this.outsideClickHandler = null;
+    }
+    if (this.escapeKeyHandler) {
+      this.doc.removeEventListener('keydown', this.escapeKeyHandler, true);
+      this.escapeKeyHandler = null;
+    }
+  }
+
+  private bindGlobalDismiss(): void {
+    this.unbindGlobalDismiss();
+    this.outsideClickHandler = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (this.hostRef.nativeElement.contains(t)) return;
+      const pop = this.popoverRef()?.nativeElement;
+      if (pop?.contains(t)) return;
+      this.dismissPopover();
+    };
+    this.escapeKeyHandler = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      this.dismissPopover();
+    };
+    setTimeout(() => {
+      if (this.outsideClickHandler) {
+        this.doc.addEventListener('click', this.outsideClickHandler, true);
+      }
+      if (this.escapeKeyHandler) {
+        this.doc.addEventListener('keydown', this.escapeKeyHandler, true);
+      }
+    }, 0);
+  }
 
   ngOnDestroy(): void {
     this.dismissPopover();
@@ -71,10 +114,20 @@ export class CardComponent implements OnDestroy {
     cardsArtImageSrc(this.card().level || 1, this.card().art_url),
   );
 
+  protected readonly cardBorderSrc = computed(() =>
+    cardsBorderImageSrc(this.card().level || 1),
+  );
+
   protected cardUid = computed(() => {
     const c = this.card() as BattleCard;
     return c.uid ?? c.id;
   });
+
+  protected readonly statPopoverId = computed(
+    () => `card-stat-popover-${this.cardUid()}`,
+  );
+
+  protected readonly statsLupaSrc = CARDS_STATS_LUPA_SRC;
 
   protected displayStars = computed((): 0 | 1 | 2 | 3 => {
     const s = this.stackStars();
@@ -132,25 +185,32 @@ export class CardComponent implements OnDestroy {
     return bits.join(' ');
   });
 
-  onPopoverEnter(ev: MouseEvent): void {
+  onStatsLupaClick(ev: MouseEvent): void {
+    ev.stopPropagation();
+    ev.preventDefault();
     if (!this.statPopoverEnabled()) return;
-    const el = ev.currentTarget as HTMLElement | null;
-    if (!el) return;
+    if (this.popoverVisible()) {
+      this.dismissPopover();
+      return;
+    }
+    this.openStatsPopover();
+  }
+
+  private openStatsPopover(): void {
+    const cardEl = this.hostRef.nativeElement.querySelector('.card') as HTMLElement | null;
+    if (!cardEl) return;
     this.popoverCoordinator.takeover(this.dismissPopover);
     this.popoverVisible.set(true);
     this.cdr.markForCheck();
+    this.bindGlobalDismiss();
     requestAnimationFrame(() => {
       const pop = this.popoverRef()?.nativeElement;
       if (!pop) return;
       if (pop.parentElement !== this.doc.body) {
         this.doc.body.appendChild(pop);
       }
-      this.positionPopover(el);
+      this.positionPopover(cardEl);
     });
-  }
-
-  onPopoverLeave(): void {
-    this.dismissPopover();
   }
 
   private hiddenPopoverStyle(): Record<string, string> {
@@ -212,11 +272,14 @@ export class CardComponent implements OnDestroy {
       visibility: 'visible',
       overflow: 'visible',
       height: 'auto',
-      pointerEvents: 'none',
+      pointerEvents: 'auto',
     });
   }
 
   onClick(): void {
+    if (this.popoverVisible()) {
+      this.dismissPopover();
+    }
     this.cardClick.emit(this.card());
   }
 }

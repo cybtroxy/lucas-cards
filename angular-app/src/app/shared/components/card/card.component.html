@@ -4,8 +4,6 @@
     [attr.data-uid]="cardUid()"
     [attr.data-card-id]="card().id"
     (click)="onClick()"
-    (mouseenter)="onPopoverEnter($event)"
-    (mouseleave)="onPopoverLeave()"
     role="presentation"
   >
     @if (displayStars() > 0) {
@@ -16,10 +14,36 @@
       </div>
     }
     <div class="card-inner">
-      @if (cardArtSrc(); as artSrc) {
-        <img class="card-art" [src]="artSrc" alt="" loading="lazy" decoding="async" />
-      } @else {
-        <div class="card-art card-art--placeholder" aria-hidden="true"></div>
+      <div class="card-art-wrap">
+        @if (cardArtSrc(); as artSrc) {
+          <img class="card-art" [src]="artSrc" alt="" loading="lazy" decoding="async" />
+        } @else {
+          <div class="card-art card-art--placeholder" aria-hidden="true"></div>
+        }
+      </div>
+      <img
+        class="card-border"
+        [src]="cardBorderSrc()"
+        width="263"
+        height="351"
+        alt=""
+        draggable="false"
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="card-level" title="Nivel">{{ card().level || 1 }}</div>
+      @if (statPopoverEnabled()) {
+        <button
+          type="button"
+          class="card-stat-lupa"
+          (click)="onStatsLupaClick($event)"
+          [attr.aria-expanded]="popoverVisible()"
+          [attr.aria-controls]="statPopoverId()"
+          title="Ver estadísticas"
+          aria-label="Ver estadísticas de la carta"
+        >
+          <img [src]="statsLupaSrc" alt="" width="32" height="32" draggable="false" />
+        </button>
       }
       <div class="stats">
         <div class="stat atk"><span class="ico">⚔️</span><span class="val-atk">{{ card().atk }}</span></div>
@@ -60,6 +84,9 @@
   <div
     #statPopover
     class="card-stat-popover"
+    [attr.id]="statPopoverId()"
+    role="region"
+    aria-label="Estadísticas"
     [ngStyle]="popoverStyle()"
     [attr.aria-hidden]="!popoverVisible()"
   >

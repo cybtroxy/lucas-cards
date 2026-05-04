@@ -4,6 +4,8 @@ import { battle_loops, shopping_loops } from './sound-loops.config';
 
 const STORAGE_KEY_ENABLED = 'lucasCardsSoundEnabled';
 const STORAGE_KEY_VOLUME = 'lucasCardsSoundVolume';
+/** Volumen maestro por defecto (0–1) si no hay valor en `localStorage`. */
+const DEFAULT_MASTER_VOLUME = 0.25;
 
 /** Por defecto MP3 (`sound-assets.config`); `setPreferMp3Assets(false)` fuerza WAV. */
 export { preferMp3Assets, setPreferMp3Assets };
@@ -463,12 +465,12 @@ export class SoundService {
   private readStoredVolume(): number {
     try {
       const s = localStorage.getItem(STORAGE_KEY_VOLUME);
-      if (s == null || s === '') return 1;
+      if (s == null || s === '') return DEFAULT_MASTER_VOLUME;
       const n = Number(s);
-      if (!Number.isFinite(n)) return 1;
+      if (!Number.isFinite(n)) return DEFAULT_MASTER_VOLUME;
       return Math.max(0, Math.min(1, n));
     } catch {
-      return 1;
+      return DEFAULT_MASTER_VOLUME;
     }
   }
 

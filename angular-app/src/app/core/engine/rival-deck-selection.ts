@@ -3,7 +3,7 @@
  * mismas reglas que la selección humana (huecos, apilado, refrescos con 💰, cartas sin coste).
  */
 import type { Card } from '../models/card.model';
-import type { DeckSlot } from '../models/deck-slot.model';
+import type { FilledDeckSlot } from '../models/deck-slot.model';
 import { newDeckSlotUid } from '../models/deck-slot.model';
 import type { ShopOfferSlot } from '../models/game-state.model';
 import {
@@ -49,7 +49,7 @@ export interface RivalSelectionTraceStep {
 }
 
 export interface RivalSelectionResult {
-  deckSlots: DeckSlot[];
+  deckSlots: FilledDeckSlot[];
   trace: RivalSelectionTraceStep[];
   targetSlotRows: number;
   maxSlotRows: number;
@@ -57,12 +57,12 @@ export interface RivalSelectionResult {
 }
 
 /** Resumen compacto del mazo rival en selección (balance / logs). */
-export function summarizeRivalDeckSlots(slots: DeckSlot[]): string {
+export function summarizeRivalDeckSlots(slots: FilledDeckSlot[]): string {
   if (slots.length === 0) return '—';
   return slots.map((s) => `${s.id}×${s.copies}`).join(', ');
 }
 
-function deckSummary(slots: DeckSlot[]): string {
+function deckSummary(slots: FilledDeckSlot[]): string {
   return summarizeRivalDeckSlots(slots);
 }
 
@@ -73,7 +73,7 @@ function shopSummary(shop: ShopOfferSlot[]): string {
 }
 
 function canRivalAddCard(
-  deck: DeckSlot[],
+  deck: FilledDeckSlot[],
   card: Card,
   maxSlots: number,
   cardIsOnShop: boolean,
@@ -86,7 +86,7 @@ function canRivalAddCard(
 }
 
 function tryAddFromShop(
-  deck: DeckSlot[],
+  deck: FilledDeckSlot[],
   shop: ShopOfferSlot[],
   slotUid: string,
   maxSlots: number,
@@ -112,7 +112,7 @@ function tryAddFromShop(
 
 function pickIdsOfAddableOffers(
   shop: ShopOfferSlot[],
-  deck: DeckSlot[],
+  deck: FilledDeckSlot[],
   maxSlots: number,
 ): string[] {
   const uids: string[] = [];
@@ -142,7 +142,7 @@ export function simulateRivalDeckSelection(input: RivalSelectionSimulationInput)
     roundIndex: number,
     kind: RivalTraceKind,
     shopRefreshCoinsSpent: number,
-    deck: DeckSlot[],
+    deck: FilledDeckSlot[],
     shop: ShopOfferSlot[],
   ): void => {
     const coinsLeft = Math.max(0, rivalCoinBudget - shopRefreshCoinsSpent);
@@ -161,7 +161,7 @@ export function simulateRivalDeckSelection(input: RivalSelectionSimulationInput)
   };
 
   let shopRefreshCoinsSpent = 0;
-  const deck: DeckSlot[] = [];
+  const deck: FilledDeckSlot[] = [];
   let roundIndex = 0;
   let shop = fillShopOffers(catalog, partidaNumber, rng);
 
@@ -239,12 +239,12 @@ export function simulateRivalDeckSelection(input: RivalSelectionSimulationInput)
   };
 }
 
-function flatCardsToDeckSlots(cards: Card[]): DeckSlot[] {
+function flatCardsToDeckSlots(cards: Card[]): FilledDeckSlot[] {
   const byId = new Map<string, number>();
   for (const c of cards) {
     byId.set(c.id, (byId.get(c.id) ?? 0) + 1);
   }
-  const out: DeckSlot[] = [];
+  const out: FilledDeckSlot[] = [];
   for (const [id, n] of byId) {
     let left = n;
     while (left > 0) {

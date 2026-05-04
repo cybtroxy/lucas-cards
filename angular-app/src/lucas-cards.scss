@@ -22,6 +22,12 @@
   --radius: 14px;
   /* Cartas: mismo aspecto que el arte PNG (224×300). */
   --lucas-card-aspect: 224 / 300;
+  /* Recorte del arte bajo el PNG de borde (263×351; insets = máx. entre `border-1`…`border-5` vía alpha del hueco). */
+  --card-art-inset-top: 6.3%;
+  --card-art-inset-bottom: 6%;
+  --card-art-inset-side: 10.3%;
+  --card-art-inner-radius: 13px;
+  --card-shell-radius: 18px;
   /* Selección: mismo ancho fijo para tienda, mazo y placeholders (alto vía aspect-ratio 224:300 en .card / huecos). */
   --lucas-select-slot-width: 160px;
   --lucas-select-card-gap: 16px;
@@ -496,22 +502,16 @@ app-result-page {
   100% {
     transform: translateY(-5px);
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-      0 0 0 2px rgba(245, 196, 81, 0.55),
-      var(--shadow),
-      0 0 20px rgba(245, 196, 81, 0.9),
-      0 0 36px rgba(253, 224, 71, 0.65),
-      0 0 52px rgba(59, 130, 246, 0.45);
+      0 0 20px rgba(245, 196, 81, 0.88),
+      0 0 36px rgba(253, 224, 71, 0.62),
+      0 0 52px rgba(59, 130, 246, 0.42);
   }
   50% {
     transform: translateY(-11px);
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.14) inset,
-      0 0 0 3px rgba(253, 224, 71, 0.75),
-      var(--shadow),
-      0 0 28px rgba(253, 224, 71, 0.95),
-      0 0 48px rgba(251, 191, 36, 0.7),
-      0 0 64px rgba(56, 189, 248, 0.55);
+      0 0 30px rgba(253, 224, 71, 0.92),
+      0 0 48px rgba(251, 191, 36, 0.68),
+      0 0 64px rgba(56, 189, 248, 0.52);
   }
 }
 
@@ -520,20 +520,17 @@ app-result-page {
   position: relative;
   z-index: 2;
 }
-#screen-select .card-pool .card.card--shop-deck-upgrade {
+#screen-select .card-pool .card-shell:has(> .card.card--shop-deck-upgrade) {
   position: relative;
   z-index: 1;
   animation: shop-deck-upgrade-pulse 2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #screen-select .card-pool .card.card--shop-deck-upgrade {
+  #screen-select .card-pool .card-shell:has(> .card.card--shop-deck-upgrade) {
     animation: none;
     transform: translateY(-6px);
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-      0 0 0 2px rgba(245, 196, 81, 0.65),
-      var(--shadow),
       0 0 24px rgba(245, 196, 81, 0.85),
       0 0 40px rgba(253, 224, 71, 0.55),
       0 0 52px rgba(59, 130, 246, 0.45);
@@ -639,8 +636,8 @@ app-result-page {
   line-height: 1.4;
   max-width: 20ch;
 }
-.card.card--in-my-deck {
-  box-shadow: 0 0 0 2px var(--gold), 0 8px 24px rgba(0,0,0,.4);
+.card-shell:has(> .card.card--in-my-deck) {
+  box-shadow: none;
   outline: none;
 }
 #my-cards .card.card--in-my-deck[draggable='true'] {
@@ -655,12 +652,17 @@ app-result-page {
   opacity: 0.6;
   transform: none;
   z-index: 3;
-  box-shadow: 0 0 0 2px rgba(245, 196, 81, 0.65), 0 12px 28px rgba(0,0,0,.5);
+}
+#my-cards .card-shell:has(> .card.card--in-my-deck.card--dragging-m) {
+  box-shadow: none;
 }
 #my-cards .card.card--in-my-deck.card--drag-over {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--gold) inset, 0 0 0 2px var(--gold);
+  outline: none;
+}
+#my-cards .card-shell:has(> .card.card--in-my-deck.card--drag-over) {
+  outline: none;
+  border-radius: var(--card-shell-radius);
+  box-shadow: none;
 }
 .my-cards-drop-tail {
   box-sizing: border-box;
@@ -703,62 +705,42 @@ app-result-page {
   margin: 0;
 }
 
-/* ===== Carta ===== */
+/* ===== Carta =====
+   Marco por PNG (`/cards-art/border/border-{nivel}.png`); el color de nivel se ve en el marco. */
 .card {
-  --frame: var(--player);
-  --frame-strong: var(--player-strong);
   position: relative;
   box-sizing: border-box;
   width: 100%;
   aspect-ratio: var(--lucas-card-aspect);
-  border-radius: 14px;
-  padding: 4px;
-  background:
-    linear-gradient(180deg, var(--frame) 0%, var(--frame-strong) 100%);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.08) inset,
-    var(--shadow);
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
   user-select: none;
   cursor: pointer;
-  transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
+  transition: transform .15s ease, filter .2s ease;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-.card.rival {
-  --frame: var(--rival);
-  --frame-strong: var(--rival-strong);
-}
-
-/* Marco por nivel: 1 verde, 2 azul, 3 violeta, 4 rojo, 5 dorado. */
-.card.card--l1 {
-  --frame: #34d399;
-  --frame-strong: #047857;
-}
-.card.card--l2 {
-  --frame: #3b82f6;
-  --frame-strong: #1e3a8a;
-}
-.card.card--l3 {
-  --frame: #a78bfa;
-  --frame-strong: #6d28d9;
-}
-.card.card--l4 {
-  --frame: #f87171;
-  --frame-strong: #991b1b;
-}
-.card.card--l5 {
-  --frame: #fde047;
-  --frame-strong: #a16207;
-}
-
 .card .card-inner {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
-  border-radius: 11px;
+  border-radius: 0;
+  overflow: visible;
+}
+.card .card-art-wrap {
+  position: absolute;
+  z-index: 0;
+  top: var(--card-art-inset-top);
+  bottom: var(--card-art-inset-bottom);
+  left: var(--card-art-inset-side);
+  right: var(--card-art-inset-side);
+  border-radius: var(--card-art-inner-radius);
   overflow: hidden;
   background: #0b1124;
+  box-sizing: border-box;
 }
 .card .card-art {
   position: absolute;
@@ -771,19 +753,36 @@ app-result-page {
   pointer-events: none;
 }
 .card .card-art--placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, #2b3a66, #1a2547);
+}
+.card .card-border {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  object-position: center;
+  display: block;
+  pointer-events: none;
 }
 .card .stats {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: var(--card-art-inset-side);
+  right: var(--card-art-inset-side);
+  bottom: var(--card-art-inset-bottom);
   z-index: 4;
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 6px 8px;
   background: rgba(0, 0, 0, 0.7);
+  border-bottom-left-radius: var(--card-art-inner-radius);
+  border-bottom-right-radius: var(--card-art-inner-radius);
   font-weight: 800;
   font-size: 14px;
   pointer-events: none;
@@ -792,6 +791,48 @@ app-result-page {
 .card .stats .ico { font-size: 14px; }
 .card .stats .atk { color: #fff; }
 .card .stats .hp  { color: #fff; }
+
+/* Nivel (color alineado al PNG de borde por nivel). */
+.card .card-level {
+  position: absolute;
+  top: calc(var(--card-art-inset-top) + 6px);
+  left: calc(var(--card-art-inset-side) + 6px);
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  border: 2px solid rgba(255, 255, 255, 0.38);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+.card.card--l1 .card-level {
+  background: linear-gradient(180deg, #b0b0b0, #757575);
+  color: #1f1f1f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.card.card--l2 .card-level {
+  background: linear-gradient(180deg, #4caf50, #2e7d32);
+  color: #fff;
+}
+.card.card--l3 .card-level {
+  background: linear-gradient(180deg, #2196f3, #1565c0);
+  color: #fff;
+}
+.card.card--l4 .card-level {
+  background: linear-gradient(180deg, #9c27b0, #6a1b9a);
+  color: #fff;
+}
+.card.card--l5 .card-level {
+  background: linear-gradient(180deg, #ffd700, #b8860b);
+  color: #3d2f06;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
 
 /* Barra de PV en batalla: encima del contenido de la carta, 80% del ancho, píldora. */
 .card .card-hpbar {
@@ -829,10 +870,6 @@ app-card {
 
 .card.selected {
   transform: translateY(-6px) scale(1.03);
-  box-shadow:
-    0 0 0 2px var(--gold) inset,
-    0 0 22px rgba(245,196,81,.45),
-    var(--shadow);
 }
 .card.dim { filter: grayscale(.5) brightness(.7); cursor: pointer; }
 .card:hover { transform: translateY(-3px); }
@@ -850,21 +887,20 @@ app-card {
 #screen-battle .side app-card .card,
 #screen-battle .side app-card .card.rival {
   position: relative;
-  transition: transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease,
-    box-shadow 0.25s ease, outline 0.15s ease;
-  /* El gradiente del marco usa --frame por nivel (.card--l1 … .card--l5), igual que fuera de batalla. */
+  transition: transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease;
+}
+#screen-battle .side app-card .card-shell {
+  transition: box-shadow 0.25s ease, outline 0.15s ease, transform 0.35s ease;
 }
 #screen-battle .side app-card .card.active,
 #screen-battle .side app-card .card.selected {
   z-index: 2;
 }
 /* Asalto actual: sin halo dorado; misma sombra base que el marco. */
-#screen-battle .side app-card .card.active {
+#screen-battle .side app-card .card-shell:has(> .card.active) {
   outline: none;
   outline-offset: 0;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    var(--shadow);
+  box-shadow: none;
 }
 
 /* Estados de combate */

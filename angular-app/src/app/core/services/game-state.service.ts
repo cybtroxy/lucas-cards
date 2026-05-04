@@ -10,8 +10,13 @@ import type {
   CombatLogViewMode,
   GameState,
 } from '../models/game-state.model';
-import type { DeckSlot } from '../models/deck-slot.model';
-import { newDeckSlotUid, persistedSlotsToDeckSlots } from '../models/deck-slot.model';
+import type { DeckSlot, FilledDeckSlot } from '../models/deck-slot.model';
+import {
+  isEmptyDeckSlot,
+  isFilledDeckSlot,
+  newDeckSlotUid,
+  persistedSlotsToDeckSlots,
+} from '../models/deck-slot.model';
 import { CardsCatalogService } from './cards-catalog.service';
 import { I18nService } from './i18n.service';
 import { SoundCue, SoundService } from './sound.service';
@@ -162,10 +167,13 @@ export class GameStateService {
     if (!this.isCardInCurrentShop(card)) return false;
     const maxSlots = maxSelectableSlotsForPartida(g.gamesInSeries + 1);
     const canStackOnSlot = g.deckSlots.some(
-      (s) => s.id === card.id && s.copies < MAX_COPIES_PER_DECK_SLOT_STACK,
+      (s) =>
+        isFilledDeckSlot(s) &&
+        s.id === card.id &&
+        s.copies < MAX_COPIES_PER_DECK_SLOT_STACK,
     );
     if (canStackOnSlot) return true;
-    return g.deckSlots.length < maxSlots;
+    return g.deckSlots.some(isEmptyDeckSlot) || g.deckSlots.length < maxSlots;
   }
 
   /** Añade la carta de una casilla concreta de la tienda y deja esa casilla vacía (hueco reservado). */
@@ -180,29 +188,46 @@ export class GameStateService {
       const c = sl.card;
       const maxSlots = maxSelectableSlotsForPartida(g.gamesInSeries + 1);
       const mergeIdx = g.deckSlots.findIndex(
-        (s) => s.id === c.id && s.copies < MAX_COPIES_PER_DECK_SLOT_STACK,
+        (s) =>
+          isFilledDeckSlot(s) &&
+          s.id === c.id &&
+          s.copies < MAX_COPIES_PER_DECK_SLOT_STACK,
       );
       if (mergeIdx >= 0) {
         sl.card = null;
         g.deckSlots = g.deckSlots.map((s, i) =>
-          i === mergeIdx ? { ...s, copies: s.copies + 1 } : s,
+          i === mergeIdx && isFilledDeckSlot(s)
+            ? { ...s, copies: s.copies + 1 }
+            : s,
         );
-      } else if (g.deckSlots.length < maxSlots) {
-        sl.card = null;
-        g.deckSlots = [...g.deckSlots, { uid: newDeckSlotUid(), id: c.id, copies: 1 }];
+      } else {
+        const emptyIdx = g.deckSlots.findIndex(isEmptyDeckSlot);
+        if (emptyIdx >= 0) {
+          sl.card = null;
+          const u = g.deckSlots[emptyIdx].uid;
+          g.deckSlots = g.deckSlots.map((s, i) =>
+            i === emptyIdx ? { uid: u, id: c.id, copies: 1 } : s,
+          );
+        } else if (g.deckSlots.length < maxSlots) {
+          sl.card = null;
+          g.deckSlots = [...g.deckSlots, { uid: newDeckSlotUid(), id: c.id, copies: 1 }];
+        }
       }
     });
   }
 
-  /** Quita el hueco completo (todas las copias apiladas) y devuelve monedas según estrellas del apilado. */
+  /** Retira la carta del hueco (todas las copias) y deja el mismo índice como vacío; devuelve monedas según estrellas. */
   removeDeckSlot(slotUid: string): void {
     this.setGame((g) => {
       const idx = g.deckSlots.findIndex((s) => s.uid === slotUid);
       if (idx < 0) return;
       const s = g.deckSlots[idx];
+      if (!isFilledDeckSlot(s)) return;
       const refund = coinsRefundWhenRemovingDeckSlot(s.copies);
       g.playerCoinsStart += refund;
-      g.deckSlots = g.deckSlots.filter((x) => x.uid !== slotUid);
+      g.deckSlots = g.deckSlots.map((x, i) =>
+        i === idx ? { uid: s.uid, empty: true } : x,
+      );
     });
   }
 
@@ -234,13 +259,14 @@ export class GameStateService {
 
   canStartBattle(): boolean {
     const g = this._game();
-    const n = g.deckSlots.length;
+    const filled = g.deckSlots.filter(isFilledDeckSlot);
+    const n = filled.length;
     const maxSlots = maxSelectableSlotsForPartida(g.gamesInSeries + 1);
     return (
       n >= MIN_DECK &&
       n <= maxSlots &&
       g.shopRefreshCoinsSpent <= g.playerCoinsStart &&
-      g.deckSlots.every((s) => s.copies >= 1)
+      filled.every((s) => s.copies >= 1)
     );
   }
 
@@ -255,7 +281,7 @@ export class GameStateService {
     };
   }
 
-  private instantiateFromSlot(slot: DeckSlot): BattleCard {
+  private instantiateFromSlot(slot: FilledDeckSlot): BattleCard {
     const base = this.catalog.findById(slot.id)!;
     const st = stackStatsFromCopies(slot.copies, base.hp, base.atk);
     return {
@@ -278,8 +304,9 @@ export class GameStateService {
       g.playerCoinsStart = Math.max(0, g.playerCoinsStart - g.shopRefreshCoinsSpent);
       g.shopRefreshCoinsSpent = 0;
       g.spentP = 0;
-      g.lastPartidaDeckSlots = g.deckSlots.map(({ id, copies }) => ({ id, copies }));
-      g.playerDeck = g.deckSlots.map((slot) => this.instantiateFromSlot(slot));
+      const filledSlots = g.deckSlots.filter(isFilledDeckSlot);
+      g.lastPartidaDeckSlots = filledSlots.map(({ id, copies }) => ({ id, copies }));
+      g.playerDeck = filledSlots.map((slot) => this.instantiateFromSlot(slot));
       const partidaN = Math.max(1, g.gamesInSeries + 1);
       const rivalSel = simulateRivalDeckSelection({
         rivalCoinBudget: g.rivalCoinsStart,
