@@ -20,9 +20,9 @@
   --hp-bad: #ef4444;
   --shadow: 0 12px 32px rgba(0,0,0,.45);
   --radius: 14px;
-  /* Cartas: ancho vertical 1 : alto 1,4 (marco con gradiente; la barra PV va fuera en batalla). */
-  --lucas-card-aspect: 1 / 1.4;
-  /* Selección: mismo ancho fijo para tienda, mazo y placeholders (alto vía aspect-ratio 1 : 1,4 en .card / huecos). */
+  /* Cartas: mismo aspecto que el arte PNG (224×300). */
+  --lucas-card-aspect: 224 / 300;
+  /* Selección: mismo ancho fijo para tienda, mazo y placeholders (alto vía aspect-ratio 224:300 en .card / huecos). */
   --lucas-select-slot-width: 160px;
   --lucas-select-card-gap: 16px;
   --lucas-select-placeholder-border: 2px dashed rgba(148, 163, 184, 0.28);
@@ -540,7 +540,7 @@ app-result-page {
   }
 }
 
-/* Hueco fijo en la tienda: misma huella que app-card (1 : 1,4). */
+/* Hueco fijo en la tienda: misma huella que app-card (224×300). */
 .shop-offer-placeholder {
   box-sizing: border-box;
   width: 100%;
@@ -729,95 +729,64 @@ app-result-page {
   --frame: var(--rival);
   --frame-strong: var(--rival-strong);
 }
+
+/* Marco por nivel: 1 verde, 2 azul, 3 violeta, 4 rojo, 5 dorado. */
+.card.card--l1 {
+  --frame: #34d399;
+  --frame-strong: #047857;
+}
+.card.card--l2 {
+  --frame: #3b82f6;
+  --frame-strong: #1e3a8a;
+}
+.card.card--l3 {
+  --frame: #a78bfa;
+  --frame-strong: #6d28d9;
+}
+.card.card--l4 {
+  --frame: #f87171;
+  --frame-strong: #991b1b;
+}
+.card.card--l5 {
+  --frame: #fde047;
+  --frame-strong: #a16207;
+}
+
 .card .card-inner {
   position: relative;
-  background: linear-gradient(180deg, #0e152c 0%, #0b1124 100%);
+  flex: 1 1 0;
+  min-height: 0;
   border-radius: 11px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0;
-  min-height: 0;
+  background: #0b1124;
 }
-.card .card-level {
+.card .card-art {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, var(--frame), var(--frame-strong));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 14px;
-  border: 2px solid rgba(255,255,255,.3);
-  box-shadow: 0 2px 6px rgba(0,0,0,.4);
-  z-index: 2;
-}
-.card .name-bar {
-  padding: 6px 8px 6px 36px;
-  font-size: 13px;
-  font-weight: 700;
-  background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card .art {
-  position: relative;
-  flex: 1 1 0;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(32px, 9vmin, 64px);
-  background: var(--art-bg, linear-gradient(135deg, #2b3a66, #1a2547));
-  text-shadow: 0 4px 12px rgba(0,0,0,.55);
-  overflow: hidden;
-}
-.card .art .emoji {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  line-height: 1;
-}
-.card .art .art-image {
-  display: block;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   object-position: center;
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,.35));
+  display: block;
+  pointer-events: none;
 }
-.card .art .type-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(99, 102, 241, 0.45);
-  color: #eef2ff;
-  text-shadow: none;
-  max-width: 52%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.card .card-art--placeholder {
+  background: linear-gradient(135deg, #2b3a66, #1a2547);
 }
 .card .stats {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 6px 8px;
-  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
+  background: rgba(0, 0, 0, 0.7);
   font-weight: 800;
   font-size: 14px;
+  pointer-events: none;
 }
 .card .stats .stat { display: flex; align-items: center; gap: 4px; }
 .card .stats .ico { font-size: 14px; }
@@ -868,7 +837,7 @@ app-card {
 .card.dim { filter: grayscale(.5) brightness(.7); cursor: pointer; }
 .card:hover { transform: translateY(-3px); }
 
-/* Ancho de columna en combate: el marco mantiene 1:1,4 dentro del host. */
+/* Ancho de columna en combate: el marco mantiene aspecto 224:300 dentro del host. */
 #screen-battle .side app-card {
   flex: 0 0 auto;
   min-width: 160px;
@@ -883,16 +852,7 @@ app-card {
   position: relative;
   transition: transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease,
     box-shadow 0.25s ease, outline 0.15s ease;
-  /* Marco neutro: sin azul/rojo del bando en el borde; solo en el círculo de nivel. */
-  --frame: #3d4c6b;
-  --frame-strong: #252f45;
-  background: linear-gradient(180deg, var(--frame) 0%, var(--frame-strong) 100%);
-}
-#screen-battle .side app-card .card .card-level {
-  background: linear-gradient(180deg, var(--player), var(--player-strong));
-}
-#screen-battle .side app-card .card.rival .card-level {
-  background: linear-gradient(180deg, var(--rival), var(--rival-strong));
+  /* El gradiente del marco usa --frame por nivel (.card--l1 … .card--l5), igual que fuera de batalla. */
 }
 #screen-battle .side app-card .card.active,
 #screen-battle .side app-card .card.selected {

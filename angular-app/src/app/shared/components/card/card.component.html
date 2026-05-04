@@ -1,7 +1,6 @@
 <div class="card-shell">
   <div
     [attr.class]="classNames()"
-    [style.--art-bg]="'var(--t-' + card().type + ')'"
     [attr.data-uid]="cardUid()"
     [attr.data-card-id]="card().id"
     (click)="onClick()"
@@ -17,18 +16,11 @@
       </div>
     }
     <div class="card-inner">
-      <div class="card-level" title="Nivel">{{ card().level || 1 }}</div>
-      <div class="name-bar">{{ card().name }}</div>
-      <div class="art">
-        @if (card().type) {
-          <span class="type-badge" [title]="i18n.tUi('typeBadgeTitle')">{{ i18n.t('type', card().type) }}</span>
-        }
-        @if (artIsImage()) {
-          <img class="art-image" [src]="card().art" [alt]="card().name" loading="lazy" decoding="async" />
-        } @else {
-          <span class="emoji">{{ card().art || '❔' }}</span>
-        }
-      </div>
+      @if (cardArtSrc(); as artSrc) {
+        <img class="card-art" [src]="artSrc" alt="" loading="lazy" decoding="async" />
+      } @else {
+        <div class="card-art card-art--placeholder" aria-hidden="true"></div>
+      }
       <div class="stats">
         <div class="stat atk"><span class="ico">⚔️</span><span class="val-atk">{{ card().atk }}</span></div>
         <div class="stat hp"><span class="ico">❤️</span><span class="val-hp">{{ displayStatHp() }}</span></div>
@@ -71,7 +63,6 @@
     [ngStyle]="popoverStyle()"
     [attr.aria-hidden]="!popoverVisible()"
   >
-    <div class="card-stat-popover__title">{{ card().name }}</div>
     <div class="card-stat-popover__stats">
       @let base = statPopoverBase();
       @if (base && (card().hp !== base.hp || card().atk !== base.atk)) {
@@ -128,13 +119,6 @@
           <span class="card-stat-popover__val"><strong>{{ card().hp }}</strong></span>
         </div>
       }
-    </div>
-    <div class="card-stat-popover__meta">
-      @if (card().type) {
-        {{ i18n.t('type', card().type) }}
-        ·
-      }
-      Niv. {{ card().level || 1 }}
     </div>
   </div>
 }

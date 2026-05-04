@@ -54,15 +54,6 @@
   box-sizing: border-box;
 }
 
-.card-stat-popover__title {
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: #fde68a;
-  margin-bottom: 8px;
-  line-height: 1.2;
-}
-
 .card-stat-popover__stats {
   display: flex;
   flex-direction: column;
@@ -124,10 +115,3 @@
   white-space: nowrap;
 }
 
-.card-stat-popover__meta {
-  font-size: 10px;
-  line-height: 1.45;
-  color: #94a3b8;
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
-  padding-top: 8px;
-}

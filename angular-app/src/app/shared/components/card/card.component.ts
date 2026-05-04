@@ -11,10 +11,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { cardsArtImageSrc } from '../../../core/constants/cards-art.constants';
 import type { BattleCard } from '../../../core/models/battle-card.model';
 import type { Card } from '../../../core/models/card.model';
-import { I18nService } from '../../../core/services/i18n.service';
-import { isLikelyImageSource } from '../../utils/art-util';
 import { CardStatPopoverCoordinator } from './card-stat-popover.coordinator';
 
 @Component({
@@ -25,7 +24,6 @@ import { CardStatPopoverCoordinator } from './card-stat-popover.coordinator';
   styleUrl: './card.component.scss',
 })
 export class CardComponent implements OnDestroy {
-  readonly i18n = inject(I18nService);
   private readonly doc = inject(DOCUMENT);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -69,7 +67,9 @@ export class CardComponent implements OnDestroy {
     this.dismissPopover();
   }
 
-  protected artIsImage = computed(() => isLikelyImageSource(this.card().art));
+  protected readonly cardArtSrc = computed(() =>
+    cardsArtImageSrc(this.card().level || 1, this.card().art_url),
+  );
 
   protected cardUid = computed(() => {
     const c = this.card() as BattleCard;
@@ -119,6 +119,8 @@ export class CardComponent implements OnDestroy {
 
   protected classNames = computed(() => {
     const bits = ['card'];
+    const lv = Math.min(5, Math.max(1, this.card().level || 1));
+    bits.push(`card--l${lv}`);
     if (this.side() === 'rival') bits.push('rival');
     const ex = this.extraClass().trim();
     if (ex) bits.push(ex);

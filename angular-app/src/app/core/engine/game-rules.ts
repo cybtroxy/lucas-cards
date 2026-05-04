@@ -154,18 +154,74 @@ export function ensureMinCoins(coinsForPlayer: number, coinsForRival: number): {
   };
 }
 
+/** Pesos por nivel (índice 0 = nivel 1, …) según la próxima partida en la serie. */
+export type ShopLevelWeights = readonly [number, number, number, number, number];
+
 /**
- * Rango de nivel en tienda según el número de la próxima partida en la serie (1 = primera).
- * No usar asaltos del duelo anterior; debe coincidir con `gamesInSeries + 1` en selección.
+ * Probabilidad de que cada **oferta** de tienda sea de un nivel dado.
+ * Partidas 1–3: 60% L1, 30% L2, 10% L3.
+ * Partidas 4–6: 30% L1, 40% L2, 20% L3, 10% L4.
+ * Partidas 7–9: 5% L1, 10% L2, 25% L3, 40% L4, 20% L5.
+ * Partida 10 en adelante: 0% L1–2, 20% L3, 30% L4, 50% L5.
+ */
+export function shopLevelWeightsFromPartida(partida: number): ShopLevelWeights {
+  const p = Math.max(1, Math.floor(partida));
+  if (p >= 10) return [0, 0, 0.2, 0.3, 0.5];
+  if (p >= 7) return [0.05, 0.1, 0.25, 0.4, 0.2];
+  if (p >= 4) return [0.3, 0.4, 0.2, 0.1, 0];
+  return [0.6, 0.3, 0.1, 0, 0];
+}
+
+function sampleLevelFromWeights(weights: ShopLevelWeights, rng: () => number): number {
+  const u = rng();
+  let cum = 0;
+  for (let i = 0; i < 5; i++) {
+    cum += weights[i] ?? 0;
+    if (u < cum) return i + 1;
+  }
+  for (let i = 4; i >= 0; i--) {
+    if ((weights[i] ?? 0) > 0) return i + 1;
+  }
+  return 1;
+}
+
+function pickShopCardForOffer(
+  catalog: Card[],
+  weights: ShopLevelWeights,
+  idCount: Map<string, number>,
+  rng: () => number,
+): Card {
+  const maxTries = 60;
+  for (let t = 0; t < maxTries; t++) {
+    const level = sampleLevelFromWeights(weights, rng);
+    const pool = catalog.filter(
+      (c) => Number(c.level) === level && (idCount.get(c.id) ?? 0) < SHOP_MAX_SAME_CARD,
+    );
+    if (pool.length > 0) {
+      return pool[Math.floor(rng() * pool.length)]!;
+    }
+  }
+  const eligible = catalog.filter((c) => (idCount.get(c.id) ?? 0) < SHOP_MAX_SAME_CARD);
+  const pickFrom = eligible.length > 0 ? eligible : catalog;
+  return pickFrom[Math.floor(rng() * pickFrom.length)]!;
+}
+
+/**
+ * Rango de niveles que pueden aparecer en tienda (peso &gt; 0) según el número de partida.
+ * Debe coincidir con `gamesInSeries + 1` en selección.
  */
 export function shopLevelRangeFromPartida(partida: number): { min: number; max: number } {
-  const p = Math.max(1, Math.floor(partida));
-  if (p <= 2) return { min: 1, max: 1 };
-  if (p <= 4) return { min: 1, max: 2 };
-  if (p <= 5) return { min: 1, max: 3 };
-  if (p === 6) return { min: 2, max: 3 };
-  if (p <= 8) return { min: 3, max: 4 };
-  return { min: 3, max: 5 };
+  const w = shopLevelWeightsFromPartida(partida);
+  let min = 5;
+  let max = 1;
+  for (let i = 0; i < 5; i++) {
+    if ((w[i] ?? 0) > 0) {
+      min = Math.min(min, i + 1);
+      max = Math.max(max, i + 1);
+    }
+  }
+  if (min > max) return { min: 1, max: 1 };
+  return { min, max };
 }
 
 /** @deprecated Alias histórico; el argumento es número de partida, no asaltos del duelo. */
@@ -178,24 +234,12 @@ export function fillShopOffers(
 ): ShopOfferSlot[] {
   if (!catalog.length) return [];
 
-  const range = shopLevelRangeFromPartida(partidaRef);
-  let pool = catalog.filter((c) => {
-    const lv = Number(c.level);
-    return lv >= range.min && lv <= range.max;
-  });
-  if (!pool.length) pool = catalog.slice();
-
+  const weights = shopLevelWeightsFromPartida(partidaRef);
   const slots: ShopOfferSlot[] = [];
   const idCount = new Map<string, number>();
 
   for (let i = 0; i < SHOP_OFFER_COUNT; i++) {
-    const eligibleInRange = pool.filter((c) => (idCount.get(c.id) ?? 0) < SHOP_MAX_SAME_CARD);
-    const eligibleWide =
-      eligibleInRange.length > 0
-        ? eligibleInRange
-        : catalog.filter((c) => (idCount.get(c.id) ?? 0) < SHOP_MAX_SAME_CARD);
-    const pickFrom = eligibleWide.length > 0 ? eligibleWide : catalog;
-    const pick = pickFrom[Math.floor(rng() * pickFrom.length)]!;
+    const pick = pickShopCardForOffer(catalog, weights, idCount, rng);
     idCount.set(pick.id, (idCount.get(pick.id) ?? 0) + 1);
     slots.push({ slotUid: newShopOfferSlotUid(), card: { ...pick } });
   }
